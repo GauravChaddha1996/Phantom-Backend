@@ -8,12 +8,12 @@ import (
 
 func main() {
 	db := openDB()
-	dao := daos.BrandDao{DB: db}
-	brand, err := dao.ReadBrandComplete(1)
+	dao := daos.PropertyDao{DB: db}
+	name, err := dao.ReadPropertyName(1)
 	if err != nil {
 		println(err.Error())
 	} else {
-		println(brand.Description)
+		println(*name)
 	}
 }
 
