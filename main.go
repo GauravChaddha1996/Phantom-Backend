@@ -3,10 +3,18 @@ package main
 import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"phantom/dataLayer/daos"
 )
 
 func main() {
-	_ = openDB()
+	db := openDB()
+	dao := daos.BrandDao{DB: db}
+	brand, err := dao.ReadBrandComplete(1)
+	if err != nil {
+		println(err.Error())
+	} else {
+		println(brand.Description)
+	}
 }
 
 func openDB() *sql.DB {

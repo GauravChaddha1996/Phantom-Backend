@@ -15,7 +15,7 @@ func prepareAndExecuteInsertQuery(db *sql.DB, query string, args ...interface{})
 	defer stmt.Close()
 
 	// Execute the query
-	result, err := stmt.Exec(args)
+	result, err := stmt.Exec(args...)
 	if err != nil {
 		return err
 	}
