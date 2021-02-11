@@ -9,16 +9,16 @@ type BrandDao struct {
 	DB *sql.DB
 }
 
-func (dao BrandDao) CreateBrand(brand dbModels.Brand) error {
+func (dao BrandDao) CreateBrand(brand dbModels.Brand) (*int64, error) {
 	query := "Insert into brand (id, name, description) values (?, ?, ?)"
-	err := prepareAndExecuteInsertQuery(dao.DB, query, brand.Id, brand.Name, brand.Description)
+	lastInsertId, err := prepareAndExecuteInsertQuery(dao.DB, query, brand.Id, brand.Name, brand.Description)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return lastInsertId, nil
 }
 
-func (dao BrandDao) ReadBrandName(id int) (*string, error) {
+func (dao BrandDao) ReadBrandName(id int64) (*string, error) {
 	var name *string
 	query := "Select name from brand where id = ? limit 1"
 
@@ -35,7 +35,7 @@ func (dao BrandDao) ReadBrandName(id int) (*string, error) {
 	return name, err
 }
 
-func (dao BrandDao) ReadBrandComplete(id int) (*dbModels.Brand, error) {
+func (dao BrandDao) ReadBrandComplete(id int64) (*dbModels.Brand, error) {
 	var brand dbModels.Brand
 	query := "Select * from brand where id = ? limit 1"
 

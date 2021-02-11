@@ -9,16 +9,16 @@ type CategoryDao struct {
 	DB *sql.DB
 }
 
-func (dao CategoryDao) CreateCategory(category dbModels.Category) error {
+func (dao CategoryDao) CreateCategory(category dbModels.Category) (*int64, error) {
 	query := "Insert into category (id, name, description) values (?, ?, ?)"
-	err := prepareAndExecuteInsertQuery(dao.DB, query, category.Id, category.Name, category.Description)
+	lastInsertId, err := prepareAndExecuteInsertQuery(dao.DB, query, category.Id, category.Name, category.Description)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return lastInsertId, nil
 }
 
-func (dao CategoryDao) ReadCategoryName(id int) (*string, error) {
+func (dao CategoryDao) ReadCategoryName(id int64) (*string, error) {
 	var name *string
 	query := "Select name from category where id = ? limit 1"
 
@@ -35,7 +35,7 @@ func (dao CategoryDao) ReadCategoryName(id int) (*string, error) {
 	return name, err
 }
 
-func (dao CategoryDao) ReadCategoryComplete(id int) (*dbModels.Category, error) {
+func (dao CategoryDao) ReadCategoryComplete(id int64) (*dbModels.Category, error) {
 	var category dbModels.Category
 	query := "Select * from category where id = ? limit 1"
 
