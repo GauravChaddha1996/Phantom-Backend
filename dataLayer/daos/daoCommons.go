@@ -38,7 +38,7 @@ func prepareAndExecuteInsertQuery(db *sql.DB, query string, args ...interface{})
 	return &lastInsertId, nil
 }
 
-func prepareAndExecuteSelectQuery(db *sql.DB, query string, args ...interface{}) (*sql.Rows, error) {
+func prepareAndExecuteSingleRowSelectQuery(db *sql.DB, query string, args ...interface{}) (*sql.Row, error) {
 
 	// Prepare the statement
 	stmt, err := db.Prepare(query)
@@ -48,10 +48,7 @@ func prepareAndExecuteSelectQuery(db *sql.DB, query string, args ...interface{})
 	defer stmt.Close()
 
 	// Execute the query
-	rows, err := stmt.Query(args...)
-	if err != nil {
-		return nil, err
-	}
+	row := stmt.QueryRow(args...)
 
-	return rows, nil
+	return row, nil
 }

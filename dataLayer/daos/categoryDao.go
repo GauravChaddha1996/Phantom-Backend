@@ -22,13 +22,12 @@ func (dao CategoryDao) ReadCategoryName(id int64) (*string, error) {
 	var name *string
 	query := "Select name from category where id = ? limit 1"
 
-	rows, err := prepareAndExecuteSelectQuery(dao.DB, query, id)
+	row, err := prepareAndExecuteSingleRowSelectQuery(dao.DB, query, id)
 	if err != nil {
 		return nil, err
 	}
 
-	rows.Next()
-	err = rows.Scan(&name)
+	err = row.Scan(&name)
 	if err != nil {
 		return nil, err
 	}
@@ -39,13 +38,12 @@ func (dao CategoryDao) ReadCategoryComplete(id int64) (*dbModels.Category, error
 	var category dbModels.Category
 	query := "Select * from category where id = ? limit 1"
 
-	rows, err := prepareAndExecuteSelectQuery(dao.DB, query, id)
+	row, err := prepareAndExecuteSingleRowSelectQuery(dao.DB, query, id)
 	if err != nil {
 		return nil, err
 	}
 
-	rows.Next()
-	err = rows.Scan(&category.Id, &category.Name, &category.Description)
+	err = row.Scan(&category.Id, &category.Name, &category.Description)
 	if err != nil {
 		return nil, err
 	}

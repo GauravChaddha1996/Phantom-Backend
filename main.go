@@ -9,6 +9,7 @@ import (
 
 func main() {
 	db := openDB()
+	defer db.Close()
 	dao := daos.PropertyValueDao{DB: db}
 	propertyValue := dbModels.PropertyValue{
 		PropertyId: 2,

@@ -22,13 +22,12 @@ func (dao PropertyDao) ReadPropertyName(id int64) (*string, error) {
 	var name *string
 	query := "Select name from property where id = ? limit 1"
 
-	rows, err := prepareAndExecuteSelectQuery(dao.DB, query, id)
+	row, err := prepareAndExecuteSingleRowSelectQuery(dao.DB, query, id)
 	if err != nil {
 		return nil, err
 	}
 
-	rows.Next()
-	err = rows.Scan(&name)
+	err = row.Scan(&name)
 	if err != nil {
 		return nil, err
 	}

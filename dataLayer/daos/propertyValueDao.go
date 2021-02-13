@@ -22,13 +22,12 @@ func (dao PropertyValueDao) ReadPropertyValueName(id int64) (*string, error) {
 	var name *string
 	query := "Select name from property_value where id = ? limit 1"
 
-	rows, err := prepareAndExecuteSelectQuery(dao.DB, query, id)
+	row, err := prepareAndExecuteSingleRowSelectQuery(dao.DB, query, id)
 	if err != nil {
 		return nil, err
 	}
 
-	rows.Next()
-	err = rows.Scan(&name)
+	err = row.Scan(&name)
 	if err != nil {
 		return nil, err
 	}
@@ -39,13 +38,12 @@ func (dao PropertyValueDao) ReadPropertyValueComplete(id int) (*dbModels.Propert
 	var propertyValue dbModels.PropertyValue
 	query := "Select * from property_value where id = ? limit 1"
 
-	rows, err := prepareAndExecuteSelectQuery(dao.DB, query, id)
+	row, err := prepareAndExecuteSingleRowSelectQuery(dao.DB, query, id)
 	if err != nil {
 		return nil, err
 	}
 
-	rows.Next()
-	err = rows.Scan(&propertyValue.Id, &propertyValue.PropertyId, &propertyValue.Name)
+	err = row.Scan(&propertyValue.Id, &propertyValue.PropertyId, &propertyValue.Name)
 	if err != nil {
 		return nil, err
 	}

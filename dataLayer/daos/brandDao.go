@@ -22,13 +22,12 @@ func (dao BrandDao) ReadBrandName(id int64) (*string, error) {
 	var name *string
 	query := "Select name from brand where id = ? limit 1"
 
-	rows, err := prepareAndExecuteSelectQuery(dao.DB, query, id)
+	row, err := prepareAndExecuteSingleRowSelectQuery(dao.DB, query, id)
 	if err != nil {
 		return nil, err
 	}
 
-	rows.Next()
-	err = rows.Scan(&name)
+	err = row.Scan(&name)
 	if err != nil {
 		return nil, err
 	}
@@ -39,13 +38,12 @@ func (dao BrandDao) ReadBrandComplete(id int64) (*dbModels.Brand, error) {
 	var brand dbModels.Brand
 	query := "Select * from brand where id = ? limit 1"
 
-	rows, err := prepareAndExecuteSelectQuery(dao.DB, query, id)
+	row, err := prepareAndExecuteSingleRowSelectQuery(dao.DB, query, id)
 	if err != nil {
 		return nil, err
 	}
 
-	rows.Next()
-	err = rows.Scan(&brand.Id, &brand.Name, &brand.Description)
+	err = row.Scan(&brand.Id, &brand.Name, &brand.Description)
 	if err != nil {
 		return nil, err
 	}
