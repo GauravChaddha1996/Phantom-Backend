@@ -10,21 +10,22 @@ import (
 func main() {
 	db := openDB()
 	defer db.Close()
-	dao := daos.PropertyValueDao{DB: db}
-	propertyValue := dbModels.PropertyValue{
-		PropertyId: 2,
-		Name:       "Property Value Z",
+	dao := daos.ProductImageDao{DB: db}
+	productImage := dbModels.ProductImage{
+		ProductId: 2,
+		Url:       "some url here",
 	}
-	lastInsertId, err := dao.CreatePropertyValue(propertyValue)
+	_, err := dao.AddProductImage(productImage)
 	if err != nil {
 		println(err.Error())
 	} else {
-		propertyValue.Id = *lastInsertId
-		name, err := dao.ReadPropertyValueName(propertyValue.Id)
-		if err!=nil {
-			println(err)
+		images, err := dao.ReadProductImages(2)
+		if err != nil {
+			println(err.Error())
 		} else {
-			println(*name)
+			for i := range images {
+				println(images[i].Url)
+			}
 		}
 	}
 }

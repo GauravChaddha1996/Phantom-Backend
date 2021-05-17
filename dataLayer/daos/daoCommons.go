@@ -52,3 +52,21 @@ func prepareAndExecuteSingleRowSelectQuery(db *sql.DB, query string, args ...int
 
 	return row, nil
 }
+
+func prepareAndExecuteSelectQuery(db *sql.DB, query string, args ...interface{}) (*sql.Rows, error) {
+
+	// Prepare the statement
+	stmt, err := db.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	// Execute the query
+	rows, err := stmt.Query(args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return rows, nil
+}
