@@ -11,26 +11,23 @@ import (
 func main() {
 	db := openDB()
 	defer db.Close()
-	dao := daos.ProductDao{db}
-	productId, err := dao.CreateProduct(dbModels.Product{
-		Id:               1,
-		BrandId:          1,
-		CategoryId:       1,
-		Name:             "Test product 1 ",
-		LongDescription:  "Prodyct 1 long desc",
-		ShortDescription: "product 1 short desc",
-		Cost:             100,
-		CardImage:        "image_url",
+	dao := daos.ProductToPropertyDao{db}
+	_, err := dao.CreateProductToPropertyMapping(dbModels.ProductToProperty{
+		ProductId:  1,
+		PropertyId: 1,
+		ValueId:    3,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	product, err := dao.ReadProduct(*productId)
+	mappingArr, err := dao.ReadAllProductToPropertyMapping()
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Print(product)
-	log.Print(product.Name)
+	println("Mapping")
+	for _, mapping := range *mappingArr {
+		log.Println(mapping)
+	}
 }
 
 func openDB() *sql.DB {
