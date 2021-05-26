@@ -26,7 +26,7 @@ func (dao ProductImageDao) ReadProductImages(productId int64) ([]*dbModels.Produ
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer closeRows(rows)
 
 	for rows.Next() {
 		var image dbModels.ProductImage

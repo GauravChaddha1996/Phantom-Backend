@@ -26,7 +26,7 @@ func (dao ProductToPropertyDao) ReadAllProductToPropertyMapping() (*[]dbModels.P
 	if queryErr != nil {
 		return nil, queryErr
 	}
-	defer rows.Close()
+	defer closeRows(rows)
 
 	for rows.Next() {
 		var mapping dbModels.ProductToProperty

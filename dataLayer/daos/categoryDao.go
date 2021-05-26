@@ -19,19 +19,11 @@ func (dao CategoryDao) CreateCategory(category dbModels.Category) (*int64, error
 }
 
 func (dao CategoryDao) ReadCategoryName(id int64) (*string, error) {
-	var name *string
-	query := "Select name from category where id = ? limit 1"
-
-	row, err := prepareAndExecuteSingleRowSelectQuery(dao.DB, query, id)
+	category, err := dao.ReadCategoryComplete(id)
 	if err != nil {
 		return nil, err
 	}
-
-	err = row.Scan(&name)
-	if err != nil {
-		return nil, err
-	}
-	return name, err
+	return &category.Name, err
 }
 
 func (dao CategoryDao) ReadCategoryComplete(id int64) (*dbModels.Category, error) {

@@ -19,22 +19,14 @@ func (dao PropertyValueDao) CreatePropertyValue(propertyValue dbModels.PropertyV
 }
 
 func (dao PropertyValueDao) ReadPropertyValueName(id int64) (*string, error) {
-	var name *string
-	query := "Select name from property_value where id = ? limit 1"
-
-	row, err := prepareAndExecuteSingleRowSelectQuery(dao.DB, query, id)
+	propertyValue, err := dao.ReadPropertyValueComplete(id)
 	if err != nil {
 		return nil, err
 	}
-
-	err = row.Scan(&name)
-	if err != nil {
-		return nil, err
-	}
-	return name, err
+	return &propertyValue.Name, err
 }
 
-func (dao PropertyValueDao) ReadPropertyValueComplete(id int) (*dbModels.PropertyValue, error) {
+func (dao PropertyValueDao) ReadPropertyValueComplete(id int64) (*dbModels.PropertyValue, error) {
 	var propertyValue dbModels.PropertyValue
 	query := "Select * from property_value where id = ? limit 1"
 

@@ -19,19 +19,11 @@ func (dao BrandDao) CreateBrand(brand dbModels.Brand) (*int64, error) {
 }
 
 func (dao BrandDao) ReadBrandName(id int64) (*string, error) {
-	var name *string
-	query := "Select name from brand where id = ? limit 1"
-
-	row, err := prepareAndExecuteSingleRowSelectQuery(dao.DB, query, id)
+	brand, err := dao.ReadBrandComplete(id)
 	if err != nil {
 		return nil, err
 	}
-
-	err = row.Scan(&name)
-	if err != nil {
-		return nil, err
-	}
-	return name, err
+	return &brand.Name, nil
 }
 
 func (dao BrandDao) ReadBrandComplete(id int64) (*dbModels.Brand, error) {
