@@ -8,10 +8,16 @@ import (
 )
 
 func PopulateCacheLayer(db *sql.DB, pool *redis.Pool) error {
-	err := populateAllProductIdsCache(db, pool)
-	if err != nil {
-		return err
+	productIdCachePopulateErr := populateAllProductIdsCache(db, pool)
+	if productIdCachePopulateErr != nil {
+		return productIdCachePopulateErr
 	}
+
+	categoryIdCachePopulateErr := populateAllCategoryIdsCache(db, pool)
+	if categoryIdCachePopulateErr != nil {
+		return categoryIdCachePopulateErr
+	}
+
 	return nil
 }
 
@@ -35,5 +41,25 @@ func populateAllProductIdsCache(db *sql.DB, pool *redis.Pool) error {
 		}
 	}
 
+	return nil
+}
+
+func populateAllCategoryIdsCache(db *sql.DB, pool *redis.Pool) error {
+	databaseDao := databasDaos.CategoryDao{DB: db}
+	cacheDao := cacheDaos.AllCategoryIdsCacheDao{Pool: pool}
+	cacheDelErr := cacheDao.DeleteWholeCache()
+	if cacheDelErr != nil {
+		return cacheDelErr
+	}
+
+	categoriesFromDb, dbErr := databaseDao.ReadAllCategories()
+	if dbErr != nil {
+		return dbErr
+	}
+
+	cacheSetArr := cacheDao.SetCategoryIds(categoriesFromDb)
+	if cacheSetArr != nil {
+		return cacheSetArr
+	}
 	return nil
 }

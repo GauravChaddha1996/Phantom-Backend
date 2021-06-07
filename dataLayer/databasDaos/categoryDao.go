@@ -41,3 +41,23 @@ func (dao CategoryDao) ReadCategoryComplete(id int64) (*dbModels.Category, error
 	}
 	return &category, nil
 }
+
+func (dao CategoryDao) ReadAllCategories() (*[]dbModels.Category, error) {
+	var categoryArr []dbModels.Category
+	query := "Select * from category"
+
+	rows, err := prepareAndExecuteSelectQuery(dao.DB, query)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var category dbModels.Category
+		rowReadErr := rows.Scan(&category.Id, &category.Name, &category.Description)
+		if rowReadErr != nil {
+			return nil, rowReadErr
+		}
+		categoryArr = append(categoryArr, category)
+	}
+	return &categoryArr, nil
+}
