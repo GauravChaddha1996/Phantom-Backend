@@ -3,31 +3,32 @@ package main
 import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gomodule/redigo/redis"
 	"log"
-	"phantom/dataLayer/databasDaos"
-	"phantom/dataLayer/dbModels"
+	"phantom/dataLayer"
+	"phantom/dataLayer/cacheDaos"
+	"time"
 )
 
 func main() {
 	db := openDB()
 	defer db.Close()
-	dao := databasDaos.ProductToPropertyDao{db}
-	_, err := dao.CreateProductToPropertyMapping(dbModels.ProductToProperty{
-		ProductId:  1,
-		PropertyId: 1,
-		ValueId:    6,
-	})
+	pool := openCachePool()
+	defer pool.Close()
+
+	err := dataLayer.PopulateCacheLayer(db, pool)
 	if err != nil {
 		log.Fatal(err)
+		return
 	}
-	mappingArr, err := dao.ReadAllProductToPropertyMapping(1)
-	if err != nil {
-		log.Fatal(err)
+
+	cacheDao := cacheDaos.AllProductIdsCacheDao{Pool: pool}
+	productIds, cacheReadErr := cacheDao.ReadAllProductIds()
+	if cacheReadErr != nil {
+		log.Fatal(cacheReadErr)
+		return
 	}
-	println("Mapping")
-	for _, mapping := range *mappingArr {
-		log.Println(mapping)
-	}
+	log.Println(productIds)
 }
 
 func openDB() *sql.DB {
@@ -36,4 +37,14 @@ func openDB() *sql.DB {
 		panic(err)
 	}
 	return db
+}
+
+func openCachePool() *redis.Pool {
+	return &redis.Pool{
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp", "localhost:6379")
+		},
+		MaxIdle:     10,
+		IdleTimeout: 120 * time.Second,
+	}
 }
