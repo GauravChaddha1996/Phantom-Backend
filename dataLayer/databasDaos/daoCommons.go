@@ -1,4 +1,4 @@
-package daos
+package databasDaos
 
 import (
 	"database/sql"

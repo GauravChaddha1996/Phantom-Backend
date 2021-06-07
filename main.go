@@ -4,14 +4,14 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
-	"phantom/dataLayer/daos"
+	"phantom/dataLayer/databasDaos"
 	"phantom/dataLayer/dbModels"
 )
 
 func main() {
 	db := openDB()
 	defer db.Close()
-	dao := daos.ProductToPropertyDao{db}
+	dao := databasDaos.ProductToPropertyDao{db}
 	_, err := dao.CreateProductToPropertyMapping(dbModels.ProductToProperty{
 		ProductId:  1,
 		PropertyId: 1,
