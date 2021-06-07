@@ -40,8 +40,8 @@ func (dao ProductDao) ReadProduct(id int64) (*dbModels.Product, error) {
 	return &product, err
 }
 
-func (dao ProductDao) ReadAllProducts() ([]*dbModels.Product, error) {
-	var products []*dbModels.Product
+func (dao ProductDao) ReadAllProducts() (*[]dbModels.Product, error) {
+	var products []dbModels.Product
 	query := "Select * from product"
 
 	rows, err := prepareAndExecuteSelectQuery(dao.DB, query)
@@ -55,8 +55,8 @@ func (dao ProductDao) ReadAllProducts() ([]*dbModels.Product, error) {
 			&product.Name, &product.LongDescription,
 			&product.ShortDescription, &product.Cost, &product.CardImage)
 		if scanErr == nil {
-			products = append(products, &product)
+			products = append(products, product)
 		}
 	}
-	return products, err
+	return &products, err
 }

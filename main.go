@@ -22,13 +22,13 @@ func main() {
 		return
 	}
 
-	cacheDao := cacheDaos.AllCategoryIdsCacheDao{Pool: pool}
-	categoryIds, cacheReadErr := cacheDao.ReadAllCategoryIds()
+	cacheDao := cacheDaos.CategoryIdToProductIdDao{Pool: pool}
+	productIds, cacheReadErr := cacheDao.ReadAllProductsOfCategoryId(1)
 	if cacheReadErr != nil {
 		log.Fatal(cacheReadErr)
 		return
 	}
-	log.Println(categoryIds)
+	log.Println(productIds)
 }
 
 func openDB() *sql.DB {
