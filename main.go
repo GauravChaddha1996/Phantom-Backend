@@ -15,12 +15,12 @@ func main() {
 	_, err := dao.CreateProductToPropertyMapping(dbModels.ProductToProperty{
 		ProductId:  1,
 		PropertyId: 1,
-		ValueId:    3,
+		ValueId:    6,
 	})
 	if err != nil {
 		log.Fatal(err)
 	}
-	mappingArr, err := dao.ReadAllProductToPropertyMapping()
+	mappingArr, err := dao.ReadAllProductToPropertyMapping(1)
 	if err != nil {
 		log.Fatal(err)
 	}

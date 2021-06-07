@@ -18,11 +18,11 @@ func (dao ProductToPropertyDao) CreateProductToPropertyMapping(productToProperty
 	return lastInsertId, nil
 }
 
-func (dao ProductToPropertyDao) ReadAllProductToPropertyMapping() (*[]dbModels.ProductToProperty, error) {
+func (dao ProductToPropertyDao) ReadAllProductToPropertyMapping(productId int64) (*[]dbModels.ProductToProperty, error) {
 	var mappingArr []dbModels.ProductToProperty
-	query := "Select * from product_to_property"
+	query := "Select * from product_to_property where product_id = ?"
 
-	rows, queryErr := prepareAndExecuteSelectQuery(dao.DB, query)
+	rows, queryErr := prepareAndExecuteSelectQuery(dao.DB, query, productId)
 	if queryErr != nil {
 		return nil, queryErr
 	}
