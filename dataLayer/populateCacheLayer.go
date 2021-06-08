@@ -11,6 +11,8 @@ import (
 func PopulateCacheLayer(db *sql.DB, pool *redis.Pool) error {
 	productDao := databasDaos.ProductDao{DB: db}
 	categoryDao := databasDaos.CategoryDao{DB: db}
+	propertyValueDao := databasDaos.PropertyValueDao{DB: db}
+	productToPropertyDao := databasDaos.ProductToPropertyDao{DB: db}
 
 	productsFromDb, dbErr := productDao.ReadAllProducts()
 	if dbErr != nil {
@@ -21,6 +23,18 @@ func PopulateCacheLayer(db *sql.DB, pool *redis.Pool) error {
 	if dbErr != nil {
 		return dbErr
 	}
+
+
+	propertyValuesArr, dbErr := propertyValueDao.ReadAllPropertyValues()
+	if dbErr != nil {
+		return dbErr
+	}
+
+	productToPropertyArr, dbErr := productToPropertyDao.ReadAllProductToPropertyMapping()
+	if dbErr != nil {
+		return dbErr
+	}
+
 
 	productIdCachePopulateErr := populateAllProductIdsCache(pool, productsFromDb)
 	if productIdCachePopulateErr != nil {
@@ -34,6 +48,11 @@ func PopulateCacheLayer(db *sql.DB, pool *redis.Pool) error {
 
 	categoryIdToProductIdPopulateErr := populateCategoryIdsToProductIdsCache(pool, productsFromDb, categoriesFromDb)
 	if categoryIdToProductIdPopulateErr != nil {
+		return categoryIdToProductIdPopulateErr
+	}
+
+	propertyValueIdToProductIdPopulateErr := populatePropertyValueIdsToProductIdsCache(pool, propertyValuesArr, productToPropertyArr)
+	if propertyValueIdToProductIdPopulateErr != nil {
 		return categoryIdToProductIdPopulateErr
 	}
 
@@ -85,6 +104,21 @@ func populateCategoryIdsToProductIdsCache(pool *redis.Pool, productsFromDb *[]db
 	}
 
 	cacheSetArr := cacheDao.SetCategoryIdsToProductIdsMap(productsFromDb)
+	if cacheSetArr != nil {
+		return cacheSetArr
+	}
+	return nil
+}
+
+
+func populatePropertyValueIdsToProductIdsCache(pool *redis.Pool, propertyValueArr *[]dbModels.PropertyValue, productToPropertyArr *[]dbModels.ProductToProperty) error {
+	cacheDao := cacheDaos.PropertyValueToProductDao{Pool: pool}
+	cacheDelErr := cacheDao.DeleteWholeCache(propertyValueArr)
+	if cacheDelErr != nil {
+		return cacheDelErr
+	}
+
+	cacheSetArr := cacheDao.SetPropertyValuesToProductIds(productToPropertyArr)
 	if cacheSetArr != nil {
 		return cacheSetArr
 	}

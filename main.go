@@ -22,8 +22,8 @@ func main() {
 		return
 	}
 
-	cacheDao := cacheDaos.CategoryIdToProductIdDao{Pool: pool}
-	productIds, cacheReadErr := cacheDao.ReadAllProductsOfCategoryId(1)
+	cacheDao := cacheDaos.PropertyValueToProductDao{Pool: pool}
+	productIds, cacheReadErr := cacheDao.ReadProductIdsOfPropertyValue(5)
 	if cacheReadErr != nil {
 		log.Fatal(cacheReadErr)
 		return
