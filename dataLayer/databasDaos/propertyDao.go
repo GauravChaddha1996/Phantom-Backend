@@ -33,3 +33,24 @@ func (dao PropertyDao) ReadPropertyName(id int64) (*string, error) {
 	}
 	return name, err
 }
+
+func (dao PropertyDao) ReadAllProperty() (*[]dbModels.Property, error) {
+	query := "Select * from property"
+
+	rows, err := prepareAndExecuteSelectQuery(dao.DB, query)
+	if err != nil {
+		return nil, err
+	}
+
+	var propertyArr []dbModels.Property
+
+	for rows.Next() {
+		var property dbModels.Property
+		err = rows.Scan(&property.Id, &property.Name)
+		if err != nil {
+			return nil, err
+		}
+		propertyArr = append(propertyArr, property)
+	}
+	return &propertyArr, err
+}

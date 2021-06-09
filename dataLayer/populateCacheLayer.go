@@ -11,6 +11,7 @@ import (
 func PopulateCacheLayer(db *sql.DB, pool *redis.Pool) error {
 	productDao := databasDaos.ProductDao{DB: db}
 	categoryDao := databasDaos.CategoryDao{DB: db}
+	propertyDao := databasDaos.PropertyDao{DB: db}
 	propertyValueDao := databasDaos.PropertyValueDao{DB: db}
 	productToPropertyDao := databasDaos.ProductToPropertyDao{DB: db}
 	categoryToPropertyDao := databasDaos.CategoryToPropertyDao{DB: db}
@@ -26,6 +27,11 @@ func PopulateCacheLayer(db *sql.DB, pool *redis.Pool) error {
 	}
 
 	propertyValuesArr, dbErr := propertyValueDao.ReadAllPropertyValues()
+	if dbErr != nil {
+		return dbErr
+	}
+
+	propertyArr, dbErr := propertyDao.ReadAllProperty()
 	if dbErr != nil {
 		return dbErr
 	}
@@ -63,6 +69,11 @@ func PopulateCacheLayer(db *sql.DB, pool *redis.Pool) error {
 	categoryIdToPropertyIdPopulateErr := populateCategoryIdToPropertyIdsCache(pool, categoriesFromDb, categoryToPropertyArr)
 	if categoryIdToPropertyIdPopulateErr != nil {
 		return categoryIdToPropertyIdPopulateErr
+	}
+
+	propertyIdToPropertyValueIdPopulateErr := populatePropertyIdToPropertyValueIdCache(pool, propertyArr, propertyValuesArr)
+	if propertyIdToPropertyValueIdPopulateErr != nil {
+		return propertyIdToPropertyValueIdPopulateErr
 	}
 
 	return nil
@@ -141,6 +152,20 @@ func populateCategoryIdToPropertyIdsCache(pool *redis.Pool, categoriesFromDb *[]
 	}
 
 	cacheSetArr := cacheDao.SetCategoryToPropertyCache(categoryToPropertyFromDbArr)
+	if cacheSetArr != nil {
+		return cacheSetArr
+	}
+	return nil
+}
+
+func populatePropertyIdToPropertyValueIdCache(pool *redis.Pool, propertyArr *[]dbModels.Property, propertyValueArr *[]dbModels.PropertyValue) error {
+	cacheDao := cacheDaos.PropertyIdToPropertyValueIdDao{Pool: pool}
+	cacheDelErr := cacheDao.DeleteWholeCache(propertyArr)
+	if cacheDelErr != nil {
+		return cacheDelErr
+	}
+
+	cacheSetArr := cacheDao.SetPropertyIdToPropertyValueIdCache(propertyValueArr)
 	if cacheSetArr != nil {
 		return cacheSetArr
 	}
