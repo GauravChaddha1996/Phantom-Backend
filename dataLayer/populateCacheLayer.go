@@ -81,6 +81,11 @@ func PopulateCacheLayer(db *sql.DB, pool *redis.Pool) error {
 		return productIdToPropertyValueIdPopulateErr
 	}
 
+	propertyValueIdToPropertyIdPopulateErr := populateProductValueIdsToPropertyIdsCache(pool, propertyValuesArr)
+	if propertyValueIdToPropertyIdPopulateErr != nil {
+		return propertyValueIdToPropertyIdPopulateErr
+	}
+
 	return nil
 }
 
@@ -185,6 +190,20 @@ func populateProductIdsToPropertyValueIdsCache(pool *redis.Pool, products *[]dbM
 	}
 
 	cacheSetArr := cacheDao.SetProductIdsToPropertyValues(productToPropertyArr)
+	if cacheSetArr != nil {
+		return cacheSetArr
+	}
+	return nil
+}
+
+func populateProductValueIdsToPropertyIdsCache(pool *redis.Pool, propertyValueArr *[]dbModels.PropertyValue) error {
+	cacheDao := cacheDaos.PropertyValueIdToPropertyIdDao{Pool: pool}
+	cacheDelErr := cacheDao.DeleteWholeCache(propertyValueArr)
+	if cacheDelErr != nil {
+		return cacheDelErr
+	}
+
+	cacheSetArr := cacheDao.SetPropertyValueIdToPropertyIdCache(propertyValueArr)
 	if cacheSetArr != nil {
 		return cacheSetArr
 	}
