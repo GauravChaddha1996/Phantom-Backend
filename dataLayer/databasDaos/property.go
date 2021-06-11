@@ -5,11 +5,11 @@ import (
 	"phantom/dataLayer/dbModels"
 )
 
-type PropertyDao struct {
+type PropertySqlDao struct {
 	DB *sql.DB
 }
 
-func (dao PropertyDao) CreateProperty(property dbModels.Property) (*int64, error) {
+func (dao PropertySqlDao) CreateProperty(property dbModels.Property) (*int64, error) {
 	query := "Insert into property (id, name) values (?, ?)"
 	lastInsertId, err := prepareAndExecuteInsertQuery(dao.DB, query, property.Id, property.Name)
 	if err != nil {
@@ -18,7 +18,7 @@ func (dao PropertyDao) CreateProperty(property dbModels.Property) (*int64, error
 	return lastInsertId, nil
 }
 
-func (dao PropertyDao) ReadPropertyName(id int64) (*string, error) {
+func (dao PropertySqlDao) ReadPropertyName(id int64) (*string, error) {
 	var name *string
 	query := "Select name from property where id = ? limit 1"
 
@@ -34,7 +34,7 @@ func (dao PropertyDao) ReadPropertyName(id int64) (*string, error) {
 	return name, err
 }
 
-func (dao PropertyDao) ReadAllProperty() (*[]dbModels.Property, error) {
+func (dao PropertySqlDao) ReadAllProperty() (*[]dbModels.Property, error) {
 	query := "Select * from property"
 
 	rows, err := prepareAndExecuteSelectQuery(dao.DB, query)

@@ -6,17 +6,17 @@ import (
 	"strconv"
 )
 
-const PropertyValueIdToProductIdSetName = "property_value_id_to_product_id"
+const PropertyValueIdToProductIdCacheName = "property_value_id_to_product_id_cache"
 
-type PropertyValueToProductDao struct {
+type PropertyValueToProductRedisDao struct {
 	Pool *redis.Pool
 }
 
-func (dao PropertyValueToProductDao) DeleteWholeCache(propertyValues *[]dbModels.PropertyValue) error {
+func (dao PropertyValueToProductRedisDao) DeleteWholeCache(propertyValues *[]dbModels.PropertyValue) error {
 	conn := dao.Pool.Get()
 
 	for _, propertyValue := range *propertyValues {
-		_, err := conn.Do("DEL", PropertyValueIdToProductIdSetName+":"+strconv.FormatInt(propertyValue.Id, 10))
+		_, err := conn.Do("DEL", PropertyValueIdToProductIdCacheName+":"+strconv.FormatInt(propertyValue.Id, 10))
 		if err != nil {
 			return err
 		}
@@ -24,10 +24,10 @@ func (dao PropertyValueToProductDao) DeleteWholeCache(propertyValues *[]dbModels
 	return nil
 }
 
-func (dao PropertyValueToProductDao) SetPropertyValuesToProductIds(dataArr *[]dbModels.ProductToProperty) error {
+func (dao PropertyValueToProductRedisDao) SetPropertyValuesToProductIds(dataArr *[]dbModels.ProductToProperty) error {
 	conn := dao.Pool.Get()
 	for _, productToProperty := range *dataArr {
-		key := PropertyValueIdToProductIdSetName + ":" + strconv.FormatInt(productToProperty.ValueId, 10)
+		key := PropertyValueIdToProductIdCacheName + ":" + strconv.FormatInt(productToProperty.ValueId, 10)
 		_, err := conn.Do("SADD", key, productToProperty.ProductId)
 		if err != nil {
 			return err
@@ -36,9 +36,9 @@ func (dao PropertyValueToProductDao) SetPropertyValuesToProductIds(dataArr *[]db
 	return nil
 }
 
-func (dao PropertyValueToProductDao) ReadProductIdsOfPropertyValue(valueId int64) (*[]int64, error) {
+func (dao PropertyValueToProductRedisDao) ReadProductIdsOfPropertyValue(valueId int64) (*[]int64, error) {
 	conn := dao.Pool.Get()
-	key := PropertyValueIdToProductIdSetName + ":" + strconv.FormatInt(valueId, 10)
+	key := PropertyValueIdToProductIdCacheName + ":" + strconv.FormatInt(valueId, 10)
 
 	productIdsArr, cacheReadErr := redis.Int64s(conn.Do("SMEMBERS", key))
 	if cacheReadErr != nil {

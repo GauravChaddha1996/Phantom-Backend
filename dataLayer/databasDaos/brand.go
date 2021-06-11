@@ -5,11 +5,11 @@ import (
 	"phantom/dataLayer/dbModels"
 )
 
-type BrandDao struct {
+type BrandSqlDao struct {
 	DB *sql.DB
 }
 
-func (dao BrandDao) CreateBrand(brand dbModels.Brand) (*int64, error) {
+func (dao BrandSqlDao) CreateBrand(brand dbModels.Brand) (*int64, error) {
 	query := "Insert into brand (id, name, description) values (?, ?, ?)"
 	lastInsertId, err := prepareAndExecuteInsertQuery(dao.DB, query, brand.Id, brand.Name, brand.Description)
 	if err != nil {
@@ -18,7 +18,7 @@ func (dao BrandDao) CreateBrand(brand dbModels.Brand) (*int64, error) {
 	return lastInsertId, nil
 }
 
-func (dao BrandDao) ReadBrandName(id int64) (*string, error) {
+func (dao BrandSqlDao) ReadBrandName(id int64) (*string, error) {
 	brand, err := dao.ReadBrandComplete(id)
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (dao BrandDao) ReadBrandName(id int64) (*string, error) {
 	return &brand.Name, nil
 }
 
-func (dao BrandDao) ReadBrandComplete(id int64) (*dbModels.Brand, error) {
+func (dao BrandSqlDao) ReadBrandComplete(id int64) (*dbModels.Brand, error) {
 	var brand dbModels.Brand
 	query := "Select * from brand where id = ? limit 1"
 

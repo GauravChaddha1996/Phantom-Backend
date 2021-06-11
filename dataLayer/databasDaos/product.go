@@ -5,11 +5,11 @@ import (
 	"phantom/dataLayer/dbModels"
 )
 
-type ProductDao struct {
+type ProductSqlDao struct {
 	DB *sql.DB
 }
 
-func (dao ProductDao) CreateProduct(product dbModels.Product) (*int64, error) {
+func (dao ProductSqlDao) CreateProduct(product dbModels.Product) (*int64, error) {
 	query := "Insert into product " +
 		"(id, brand_id, category_id, name, long_description, short_description, cost, card_image) " +
 		"values (?, ?, ?, ?, ?, ?, ?, ?)"
@@ -22,7 +22,7 @@ func (dao ProductDao) CreateProduct(product dbModels.Product) (*int64, error) {
 	return lastInsertId, nil
 }
 
-func (dao ProductDao) ReadProduct(id int64) (*dbModels.Product, error) {
+func (dao ProductSqlDao) ReadProduct(id int64) (*dbModels.Product, error) {
 	var product dbModels.Product
 	query := "Select * from product where id = ? limit 1"
 
@@ -40,7 +40,7 @@ func (dao ProductDao) ReadProduct(id int64) (*dbModels.Product, error) {
 	return &product, err
 }
 
-func (dao ProductDao) ReadAllProducts() (*[]dbModels.Product, error) {
+func (dao ProductSqlDao) ReadAllProducts() (*[]dbModels.Product, error) {
 	var products []dbModels.Product
 	query := "Select * from product"
 

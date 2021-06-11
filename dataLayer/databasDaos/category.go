@@ -5,11 +5,11 @@ import (
 	"phantom/dataLayer/dbModels"
 )
 
-type CategoryDao struct {
+type CategorySqlDao struct {
 	DB *sql.DB
 }
 
-func (dao CategoryDao) CreateCategory(category dbModels.Category) (*int64, error) {
+func (dao CategorySqlDao) CreateCategory(category dbModels.Category) (*int64, error) {
 	query := "Insert into category (id, name, description) values (?, ?, ?)"
 	lastInsertId, err := prepareAndExecuteInsertQuery(dao.DB, query, category.Id, category.Name, category.Description)
 	if err != nil {
@@ -18,7 +18,7 @@ func (dao CategoryDao) CreateCategory(category dbModels.Category) (*int64, error
 	return lastInsertId, nil
 }
 
-func (dao CategoryDao) ReadCategoryName(id int64) (*string, error) {
+func (dao CategorySqlDao) ReadCategoryName(id int64) (*string, error) {
 	category, err := dao.ReadCategoryComplete(id)
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (dao CategoryDao) ReadCategoryName(id int64) (*string, error) {
 	return &category.Name, err
 }
 
-func (dao CategoryDao) ReadCategoryComplete(id int64) (*dbModels.Category, error) {
+func (dao CategorySqlDao) ReadCategoryComplete(id int64) (*dbModels.Category, error) {
 	var category dbModels.Category
 	query := "Select * from category where id = ? limit 1"
 
@@ -42,7 +42,7 @@ func (dao CategoryDao) ReadCategoryComplete(id int64) (*dbModels.Category, error
 	return &category, nil
 }
 
-func (dao CategoryDao) ReadAllCategories() (*[]dbModels.Category, error) {
+func (dao CategorySqlDao) ReadAllCategories() (*[]dbModels.Category, error) {
 	var categoryArr []dbModels.Category
 	query := "Select * from category"
 

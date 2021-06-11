@@ -22,13 +22,13 @@ func main() {
 		return
 	}
 
-	cacheDao := cacheDaos.PropertyValueIdToPropertyIdDao{Pool: pool}
-	propertyId, cacheReadErr := cacheDao.ReadPropertyIdForPropertyValueId(7)
+	cacheDao := cacheDaos.CategoryIdToProductIdRedisDao{Pool: pool}
+	productsOfCategoryId, cacheReadErr := cacheDao.ReadAllProductsOfCategoryId(1)
 	if cacheReadErr != nil {
 		log.Fatal(cacheReadErr)
 		return
 	}
-	log.Println(*propertyId)
+	log.Println(*productsOfCategoryId)
 }
 
 func openDB() *sql.DB {

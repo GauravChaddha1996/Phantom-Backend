@@ -5,11 +5,11 @@ import (
 	"phantom/dataLayer/dbModels"
 )
 
-type PropertyValueDao struct {
+type PropertyValueSqlDao struct {
 	DB *sql.DB
 }
 
-func (dao PropertyValueDao) CreatePropertyValue(propertyValue dbModels.PropertyValue) (*int64, error) {
+func (dao PropertyValueSqlDao) CreatePropertyValue(propertyValue dbModels.PropertyValue) (*int64, error) {
 	query := "Insert into property_value (id, property_id, name) values (?, ?, ?)"
 	lastInsertId, err := prepareAndExecuteInsertQuery(dao.DB, query, propertyValue.Id, propertyValue.PropertyId, propertyValue.Name)
 	if err != nil {
@@ -18,7 +18,7 @@ func (dao PropertyValueDao) CreatePropertyValue(propertyValue dbModels.PropertyV
 	return lastInsertId, nil
 }
 
-func (dao PropertyValueDao) ReadPropertyValueName(id int64) (*string, error) {
+func (dao PropertyValueSqlDao) ReadPropertyValueName(id int64) (*string, error) {
 	propertyValue, err := dao.ReadPropertyValueComplete(id)
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (dao PropertyValueDao) ReadPropertyValueName(id int64) (*string, error) {
 	return &propertyValue.Name, err
 }
 
-func (dao PropertyValueDao) ReadPropertyValueComplete(id int64) (*dbModels.PropertyValue, error) {
+func (dao PropertyValueSqlDao) ReadPropertyValueComplete(id int64) (*dbModels.PropertyValue, error) {
 	var propertyValue dbModels.PropertyValue
 	query := "Select * from property_value where id = ? limit 1"
 
@@ -42,7 +42,7 @@ func (dao PropertyValueDao) ReadPropertyValueComplete(id int64) (*dbModels.Prope
 	return &propertyValue, nil
 }
 
-func (dao PropertyValueDao) ReadAllPropertyValues() (*[]dbModels.PropertyValue, error) {
+func (dao PropertyValueSqlDao) ReadAllPropertyValues() (*[]dbModels.PropertyValue, error) {
 	var propertyValueArr []dbModels.PropertyValue
 	query := "Select * from property_value"
 

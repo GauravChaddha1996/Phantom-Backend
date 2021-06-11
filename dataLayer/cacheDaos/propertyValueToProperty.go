@@ -6,16 +6,16 @@ import (
 	"strconv"
 )
 
-const PropertyValueIdToPropertyIdSetName = "property_value_id_to_property_id"
+const PropertyValueIdToPropertyIdCacheName = "property_value_id_to_property_id_cache"
 
-type PropertyValueIdToPropertyIdDao struct {
+type PropertyValueIdToPropertyIdRedisDao struct {
 	Pool *redis.Pool
 }
 
-func (dao PropertyValueIdToPropertyIdDao) DeleteWholeCache(propertyValueArr *[]dbModels.PropertyValue) error {
+func (dao PropertyValueIdToPropertyIdRedisDao) DeleteWholeCache(propertyValueArr *[]dbModels.PropertyValue) error {
 	conn := dao.Pool.Get()
 	for _, propertyValue := range *propertyValueArr {
-		key := PropertyValueIdToPropertyIdSetName + ":" + strconv.FormatInt(propertyValue.Id, 10)
+		key := PropertyValueIdToPropertyIdCacheName + ":" + strconv.FormatInt(propertyValue.Id, 10)
 		_, err := conn.Do("DEL", key)
 		if err != nil {
 			return err
@@ -24,10 +24,10 @@ func (dao PropertyValueIdToPropertyIdDao) DeleteWholeCache(propertyValueArr *[]d
 	return nil
 }
 
-func (dao PropertyValueIdToPropertyIdDao) SetPropertyValueIdToPropertyIdCache(dataArr *[]dbModels.PropertyValue) error {
+func (dao PropertyValueIdToPropertyIdRedisDao) SetPropertyValueIdToPropertyIdCache(dataArr *[]dbModels.PropertyValue) error {
 	conn := dao.Pool.Get()
 	for _, propertyValue := range *dataArr {
-		key := PropertyValueIdToPropertyIdSetName + ":" + strconv.FormatInt(propertyValue.Id, 10)
+		key := PropertyValueIdToPropertyIdCacheName + ":" + strconv.FormatInt(propertyValue.Id, 10)
 		_, err := conn.Do("SET", key, propertyValue.PropertyId)
 		if err != nil {
 			return err
@@ -36,9 +36,9 @@ func (dao PropertyValueIdToPropertyIdDao) SetPropertyValueIdToPropertyIdCache(da
 	return nil
 }
 
-func (dao PropertyValueIdToPropertyIdDao) ReadPropertyIdForPropertyValueId(propertyValueId int64) (*int64, error) {
+func (dao PropertyValueIdToPropertyIdRedisDao) ReadPropertyIdForPropertyValueId(propertyValueId int64) (*int64, error) {
 	conn := dao.Pool.Get()
-	key := PropertyValueIdToPropertyIdSetName + ":" + strconv.FormatInt(propertyValueId, 10)
+	key := PropertyValueIdToPropertyIdCacheName + ":" + strconv.FormatInt(propertyValueId, 10)
 	propertyId, err := redis.Int64(conn.Do("GET", key))
 	if err != nil {
 		return nil, err

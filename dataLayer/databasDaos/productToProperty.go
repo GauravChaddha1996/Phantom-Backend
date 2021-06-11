@@ -5,11 +5,11 @@ import (
 	"phantom/dataLayer/dbModels"
 )
 
-type ProductToPropertyDao struct {
+type ProductToPropertySqlDao struct {
 	DB *sql.DB
 }
 
-func (dao ProductToPropertyDao) CreateProductToPropertyMapping(productToProperty dbModels.ProductToProperty) (*int64, error) {
+func (dao ProductToPropertySqlDao) CreateProductToPropertyMapping(productToProperty dbModels.ProductToProperty) (*int64, error) {
 	query := "Insert into product_to_property (product_id, property_id, value_id) values (?, ?, ?)"
 	lastInsertId, err := prepareAndExecuteInsertQuery(dao.DB, query, productToProperty.ProductId, productToProperty.PropertyId, productToProperty.ValueId)
 	if err != nil {
@@ -18,7 +18,7 @@ func (dao ProductToPropertyDao) CreateProductToPropertyMapping(productToProperty
 	return lastInsertId, nil
 }
 
-func (dao ProductToPropertyDao) ReadAllProductToPropertyMappingForProductId(productId int64) (*[]dbModels.ProductToProperty, error) {
+func (dao ProductToPropertySqlDao) ReadAllProductToPropertyMappingForProductId(productId int64) (*[]dbModels.ProductToProperty, error) {
 	var mappingArr []dbModels.ProductToProperty
 	query := "Select * from product_to_property where product_id = ?"
 
@@ -39,7 +39,7 @@ func (dao ProductToPropertyDao) ReadAllProductToPropertyMappingForProductId(prod
 	return &mappingArr, queryErr
 }
 
-func (dao ProductToPropertyDao) ReadAllProductToPropertyMapping() (*[]dbModels.ProductToProperty, error) {
+func (dao ProductToPropertySqlDao) ReadAllProductToPropertyMapping() (*[]dbModels.ProductToProperty, error) {
 	var mappingArr []dbModels.ProductToProperty
 	query := "Select * from product_to_property"
 

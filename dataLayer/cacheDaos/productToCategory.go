@@ -6,16 +6,16 @@ import (
 	"strconv"
 )
 
-const CategoryIdToProductIdSetName = "category_id_to_product_id_set"
+const CategoryIdToProductIdCacheName = "category_id_to_product_id_cache"
 
-type CategoryIdToProductIdDao struct {
+type CategoryIdToProductIdRedisDao struct {
 	Pool *redis.Pool
 }
 
-func (dao CategoryIdToProductIdDao) DeleteWholeCache(categoriesFromDb *[]dbModels.Category) error {
+func (dao CategoryIdToProductIdRedisDao) DeleteWholeCache(categoriesFromDb *[]dbModels.Category) error {
 	conn := dao.Pool.Get()
 	for _, category := range *categoriesFromDb {
-		_, err := conn.Do("DEL", CategoryIdToProductIdSetName+":"+strconv.FormatInt(category.Id, 10))
+		_, err := conn.Do("DEL", CategoryIdToProductIdCacheName+":"+strconv.FormatInt(category.Id, 10))
 		if err != nil {
 			return err
 		}
@@ -23,10 +23,10 @@ func (dao CategoryIdToProductIdDao) DeleteWholeCache(categoriesFromDb *[]dbModel
 	return nil
 }
 
-func (dao CategoryIdToProductIdDao) SetCategoryIdsToProductIdsMap(productArr *[]dbModels.Product) error {
+func (dao CategoryIdToProductIdRedisDao) SetCategoryIdsToProductIdsMap(productArr *[]dbModels.Product) error {
 	conn := dao.Pool.Get()
 	for _, product := range *productArr {
-		key := CategoryIdToProductIdSetName + ":" + strconv.FormatInt(product.CategoryId, 10)
+		key := CategoryIdToProductIdCacheName + ":" + strconv.FormatInt(product.CategoryId, 10)
 		_, categoryIdSetErr := conn.Do("SADD", key, product.Id)
 		if categoryIdSetErr != nil {
 			return categoryIdSetErr
@@ -35,20 +35,12 @@ func (dao CategoryIdToProductIdDao) SetCategoryIdsToProductIdsMap(productArr *[]
 	return nil
 }
 
-func (dao CategoryIdToProductIdDao) ReadAllProductsOfCategoryId(categoryId int64) (*[]int64, error) {
+func (dao CategoryIdToProductIdRedisDao) ReadAllProductsOfCategoryId(categoryId int64) (*[]int64, error) {
 	conn := dao.Pool.Get()
-	key := CategoryIdToProductIdSetName + ":" + strconv.FormatInt(categoryId, 10)
-	productIdStrArr, readCacheErr := redis.Strings(conn.Do("SMEMBERS", key))
+	key := CategoryIdToProductIdCacheName + ":" + strconv.FormatInt(categoryId, 10)
+	productIdsArr, readCacheErr := redis.Int64s(conn.Do("SMEMBERS", key))
 	if readCacheErr != nil {
 		return nil, readCacheErr
-	}
-	var productIdsArr = make([]int64, len(productIdStrArr))
-	for index, productIdStr := range productIdStrArr {
-		productId, atoiErr := strconv.ParseInt(productIdStr, 10, 64)
-		if atoiErr != nil {
-			return nil, atoiErr
-		}
-		productIdsArr[index] = productId
 	}
 	return &productIdsArr, nil
 }

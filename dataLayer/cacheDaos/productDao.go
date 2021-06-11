@@ -5,33 +5,33 @@ import (
 	"phantom/dataLayer/dbModels"
 )
 
-const AllProductIdSetName = "all_product_ids_cache"
+const AllProductIdCacheName = "all_product_ids_cache"
 
-type AllProductIdsCacheDao struct {
+type AllProductIdsRedisDao struct {
 	Pool *redis.Pool
 }
 
-func (dao AllProductIdsCacheDao) DeleteWholeCache() error {
+func (dao AllProductIdsRedisDao) DeleteWholeCache() error {
 	conn := dao.Pool.Get()
-	_, err := conn.Do("DEL", AllProductIdSetName)
+	_, err := conn.Do("DEL", AllProductIdCacheName)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (dao AllProductIdsCacheDao) SetProductId(product *dbModels.Product) error {
+func (dao AllProductIdsRedisDao) SetProductId(product *dbModels.Product) error {
 	conn := dao.Pool.Get()
-	_, err := conn.Do("SADD", AllProductIdSetName, product.Id)
+	_, err := conn.Do("SADD", AllProductIdCacheName, product.Id)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (dao AllProductIdsCacheDao) ReadAllProductIds() (*[]string, error) {
+func (dao AllProductIdsRedisDao) ReadAllProductIds() (*[]string, error) {
 	conn := dao.Pool.Get()
-	productIds, err := redis.Strings(conn.Do("SMEMBERS", AllProductIdSetName))
+	productIds, err := redis.Strings(conn.Do("SMEMBERS", AllProductIdCacheName))
 	if err != nil {
 		return nil, err
 	}

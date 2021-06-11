@@ -9,41 +9,17 @@ import (
 )
 
 func PopulateCacheLayer(db *sql.DB, pool *redis.Pool) error {
-	productDao := databasDaos.ProductDao{DB: db}
-	categoryDao := databasDaos.CategoryDao{DB: db}
-	propertyDao := databasDaos.PropertyDao{DB: db}
-	propertyValueDao := databasDaos.PropertyValueDao{DB: db}
-	productToPropertyDao := databasDaos.ProductToPropertyDao{DB: db}
-	categoryToPropertyDao := databasDaos.CategoryToPropertyDao{DB: db}
 
-	productsFromDb, dbErr := productDao.ReadAllProducts()
-	if dbErr != nil {
-		return dbErr
-	}
+	productDao, categoryDao, propertyDao, propertyValueDao,
+	productToPropertyDao, categoryToPropertyDao := createDatabaseDaos(db)
 
-	categoriesFromDb, dbErr := categoryDao.ReadAllCategories()
-	if dbErr != nil {
-		return dbErr
-	}
+	productsFromDb, categoriesFromDb, propertyValuesArr,
+	propertyArr, productToPropertyArr, categoryToPropertyArr,
+	readFromDbErr := readDataFromDatabase(productDao, categoryDao, propertyValueDao,
+		propertyDao, productToPropertyDao, categoryToPropertyDao)
 
-	propertyValuesArr, dbErr := propertyValueDao.ReadAllPropertyValues()
-	if dbErr != nil {
-		return dbErr
-	}
-
-	propertyArr, dbErr := propertyDao.ReadAllProperty()
-	if dbErr != nil {
-		return dbErr
-	}
-
-	productToPropertyArr, dbErr := productToPropertyDao.ReadAllProductToPropertyMapping()
-	if dbErr != nil {
-		return dbErr
-	}
-
-	categoryToPropertyArr, dbErr := categoryToPropertyDao.ReadAllCategoryToPropertyMapping()
-	if dbErr != nil {
-		return dbErr
+	if readFromDbErr != nil {
+		return readFromDbErr
 	}
 
 	productIdCachePopulateErr := populateAllProductIdsCache(pool, productsFromDb)
@@ -89,8 +65,51 @@ func PopulateCacheLayer(db *sql.DB, pool *redis.Pool) error {
 	return nil
 }
 
+func readDataFromDatabase(productDao databasDaos.ProductSqlDao, categoryDao databasDaos.CategorySqlDao, propertyValueDao databasDaos.PropertyValueSqlDao, propertyDao databasDaos.PropertySqlDao, productToPropertyDao databasDaos.ProductToPropertySqlDao, categoryToPropertyDao databasDaos.CategoryToPropertySqlDao) (*[]dbModels.Product, *[]dbModels.Category, *[]dbModels.PropertyValue, *[]dbModels.Property, *[]dbModels.ProductToProperty, *[]dbModels.CategoryToProperty, error) {
+	productsFromDb, dbErr := productDao.ReadAllProducts()
+	if dbErr != nil {
+		return nil, nil, nil, nil, nil, nil, dbErr
+	}
+
+	categoriesFromDb, dbErr := categoryDao.ReadAllCategories()
+	if dbErr != nil {
+		return nil, nil, nil, nil, nil, nil, dbErr
+	}
+
+	propertyValuesArr, dbErr := propertyValueDao.ReadAllPropertyValues()
+	if dbErr != nil {
+		return nil, nil, nil, nil, nil, nil, dbErr
+	}
+
+	propertyArr, dbErr := propertyDao.ReadAllProperty()
+	if dbErr != nil {
+		return nil, nil, nil, nil, nil, nil, dbErr
+	}
+
+	productToPropertyArr, dbErr := productToPropertyDao.ReadAllProductToPropertyMapping()
+	if dbErr != nil {
+		return nil, nil, nil, nil, nil, nil, dbErr
+	}
+
+	categoryToPropertyArr, dbErr := categoryToPropertyDao.ReadAllCategoryToPropertyMapping()
+	if dbErr != nil {
+		return nil, nil, nil, nil, nil, nil, dbErr
+	}
+	return productsFromDb, categoriesFromDb, propertyValuesArr, propertyArr, productToPropertyArr, categoryToPropertyArr, nil
+}
+
+func createDatabaseDaos(db *sql.DB) (databasDaos.ProductSqlDao, databasDaos.CategorySqlDao, databasDaos.PropertySqlDao, databasDaos.PropertyValueSqlDao, databasDaos.ProductToPropertySqlDao, databasDaos.CategoryToPropertySqlDao) {
+	productDao := databasDaos.ProductSqlDao{DB: db}
+	categoryDao := databasDaos.CategorySqlDao{DB: db}
+	propertyDao := databasDaos.PropertySqlDao{DB: db}
+	propertyValueDao := databasDaos.PropertyValueSqlDao{DB: db}
+	productToPropertyDao := databasDaos.ProductToPropertySqlDao{DB: db}
+	categoryToPropertyDao := databasDaos.CategoryToPropertySqlDao{DB: db}
+	return productDao, categoryDao, propertyDao, propertyValueDao, productToPropertyDao, categoryToPropertyDao
+}
+
 func populateAllProductIdsCache(pool *redis.Pool, productsFromDb *[]dbModels.Product) error {
-	cacheDao := cacheDaos.AllProductIdsCacheDao{Pool: pool}
+	cacheDao := cacheDaos.AllProductIdsRedisDao{Pool: pool}
 	cacheDelErr := cacheDao.DeleteWholeCache()
 	if cacheDelErr != nil {
 		return cacheDelErr
@@ -107,8 +126,8 @@ func populateAllProductIdsCache(pool *redis.Pool, productsFromDb *[]dbModels.Pro
 }
 
 func populateAllCategoryIdsCache(db *sql.DB, pool *redis.Pool) error {
-	databaseDao := databasDaos.CategoryDao{DB: db}
-	cacheDao := cacheDaos.AllCategoryIdsCacheDao{Pool: pool}
+	databaseDao := databasDaos.CategorySqlDao{DB: db}
+	cacheDao := cacheDaos.AllCategoryIdsRedisDao{Pool: pool}
 	cacheDelErr := cacheDao.DeleteWholeCache()
 	if cacheDelErr != nil {
 		return cacheDelErr
@@ -127,7 +146,7 @@ func populateAllCategoryIdsCache(db *sql.DB, pool *redis.Pool) error {
 }
 
 func populateCategoryIdsToProductIdsCache(pool *redis.Pool, productsFromDb *[]dbModels.Product, categoriesFromDb *[]dbModels.Category) error {
-	cacheDao := cacheDaos.CategoryIdToProductIdDao{Pool: pool}
+	cacheDao := cacheDaos.CategoryIdToProductIdRedisDao{Pool: pool}
 	cacheDelErr := cacheDao.DeleteWholeCache(categoriesFromDb)
 	if cacheDelErr != nil {
 		return cacheDelErr
@@ -141,7 +160,7 @@ func populateCategoryIdsToProductIdsCache(pool *redis.Pool, productsFromDb *[]db
 }
 
 func populatePropertyValueIdsToProductIdsCache(pool *redis.Pool, propertyValueArr *[]dbModels.PropertyValue, productToPropertyArr *[]dbModels.ProductToProperty) error {
-	cacheDao := cacheDaos.PropertyValueToProductDao{Pool: pool}
+	cacheDao := cacheDaos.PropertyValueToProductRedisDao{Pool: pool}
 	cacheDelErr := cacheDao.DeleteWholeCache(propertyValueArr)
 	if cacheDelErr != nil {
 		return cacheDelErr
@@ -155,7 +174,7 @@ func populatePropertyValueIdsToProductIdsCache(pool *redis.Pool, propertyValueAr
 }
 
 func populateCategoryIdToPropertyIdsCache(pool *redis.Pool, categoriesFromDb *[]dbModels.Category, categoryToPropertyFromDbArr *[]dbModels.CategoryToProperty) error {
-	cacheDao := cacheDaos.CategoryIdToPropertyIdDao{Pool: pool}
+	cacheDao := cacheDaos.CategoryIdToPropertyIdRedisDao{Pool: pool}
 	cacheDelErr := cacheDao.DeleteWholeCache(categoriesFromDb)
 	if cacheDelErr != nil {
 		return cacheDelErr
@@ -169,7 +188,7 @@ func populateCategoryIdToPropertyIdsCache(pool *redis.Pool, categoriesFromDb *[]
 }
 
 func populatePropertyIdToPropertyValueIdCache(pool *redis.Pool, propertyArr *[]dbModels.Property, propertyValueArr *[]dbModels.PropertyValue) error {
-	cacheDao := cacheDaos.PropertyIdToPropertyValueIdDao{Pool: pool}
+	cacheDao := cacheDaos.PropertyIdToPropertyValueIdRedisDao{Pool: pool}
 	cacheDelErr := cacheDao.DeleteWholeCache(propertyArr)
 	if cacheDelErr != nil {
 		return cacheDelErr
@@ -183,7 +202,7 @@ func populatePropertyIdToPropertyValueIdCache(pool *redis.Pool, propertyArr *[]d
 }
 
 func populateProductIdsToPropertyValueIdsCache(pool *redis.Pool, products *[]dbModels.Product, productToPropertyArr *[]dbModels.ProductToProperty) error {
-	cacheDao := cacheDaos.ProductToPropertyValueDao{Pool: pool}
+	cacheDao := cacheDaos.ProductToPropertyValueRedisDao{Pool: pool}
 	cacheDelErr := cacheDao.DeleteWholeCache(products)
 	if cacheDelErr != nil {
 		return cacheDelErr
@@ -197,7 +216,7 @@ func populateProductIdsToPropertyValueIdsCache(pool *redis.Pool, products *[]dbM
 }
 
 func populateProductValueIdsToPropertyIdsCache(pool *redis.Pool, propertyValueArr *[]dbModels.PropertyValue) error {
-	cacheDao := cacheDaos.PropertyValueIdToPropertyIdDao{Pool: pool}
+	cacheDao := cacheDaos.PropertyValueIdToPropertyIdRedisDao{Pool: pool}
 	cacheDelErr := cacheDao.DeleteWholeCache(propertyValueArr)
 	if cacheDelErr != nil {
 		return cacheDelErr

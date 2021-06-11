@@ -5,11 +5,11 @@ import (
 	"phantom/dataLayer/dbModels"
 )
 
-type ProductImageDao struct {
+type ProductImageSqlDao struct {
 	DB *sql.DB
 }
 
-func (dao ProductImageDao) AddProductImage(productImage dbModels.ProductImage) (*dbModels.ProductImage, error) {
+func (dao ProductImageSqlDao) AddProductImage(productImage dbModels.ProductImage) (*dbModels.ProductImage, error) {
 	query := "Insert into product_image (product_id, url) values (?, ?)"
 	_, err := prepareAndExecuteInsertQuery(dao.DB, query, productImage.ProductId, productImage.Url)
 	if err != nil {
@@ -18,7 +18,7 @@ func (dao ProductImageDao) AddProductImage(productImage dbModels.ProductImage) (
 	return &productImage, nil
 }
 
-func (dao ProductImageDao) ReadProductImages(productId int64) ([]*dbModels.ProductImage, error) {
+func (dao ProductImageSqlDao) ReadProductImages(productId int64) ([]*dbModels.ProductImage, error) {
 	var images []*dbModels.ProductImage
 	query := "Select * from product_image where product_id = ?"
 
