@@ -2,49 +2,67 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gomodule/redigo/redis"
 	"log"
+	"phantom/config"
 	"phantom/dataLayer"
-	"phantom/dataLayer/cacheDaos"
+	"phantom/router"
 	"time"
 )
 
 func main() {
-	db := openDB()
-	defer db.Close()
-	pool := openCachePool()
-	defer pool.Close()
 
-	err := dataLayer.PopulateCacheLayer(db, pool)
-	if err != nil {
-		log.Fatal(err)
+	// Read config struct
+	conf := config.ReadConfig()
+	log.Println(conf)
+
+	// Open sql database conection
+	sqlDb := openSqlDB(conf)
+	defer func(db *sql.DB) {
+		_ = db.Close()
+	}(sqlDb)
+
+	// Open redis cache pool
+	redisCachePool := openRedisCachePool(conf)
+	defer func(pool *redis.Pool) {
+		_ = pool.Close()
+	}(redisCachePool)
+
+	// Pre-populate redis cache pool
+	cachePopulateErr := dataLayer.PopulateCacheLayer(sqlDb, redisCachePool)
+	if cachePopulateErr != nil {
+		log.Fatal(cachePopulateErr)
 		return
 	}
 
-	cacheDao := cacheDaos.CategoryIdToProductIdRedisDao{Pool: pool}
-	productsOfCategoryId, cacheReadErr := cacheDao.ReadAllProductsOfCategoryId(1)
-	if cacheReadErr != nil {
-		log.Fatal(cacheReadErr)
+	// Initialize router
+	_, routerInitErr := router.Initialize(conf)
+	if routerInitErr != nil {
+		log.Fatal(routerInitErr)
 		return
 	}
-	log.Println(*productsOfCategoryId)
 }
 
-func openDB() *sql.DB {
-	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/phantom")
-	if err != nil {
-		panic(err)
+func openSqlDB(config *config.Config) *sql.DB {
+	dbConfig := config.Database
+	dataSourceName := fmt.Sprintf("%s:@%s(%s:%s)/%s", dbConfig.Username, dbConfig.Network, dbConfig.Host, dbConfig.Port, dbConfig.Name)
+	db, dbOpenErr := sql.Open(dbConfig.Driver, dataSourceName)
+	if dbOpenErr != nil {
+		panic(dbOpenErr)
 	}
 	return db
 }
 
-func openCachePool() *redis.Pool {
+func openRedisCachePool(config *config.Config) *redis.Pool {
+	cacheConfig := config.Cache
+	address := fmt.Sprintf("%s:%d", cacheConfig.Host, cacheConfig.Port)
 	return &redis.Pool{
 		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", "localhost:6379")
+			return redis.Dial(cacheConfig.Network, address)
 		},
-		MaxIdle:     10,
-		IdleTimeout: 120 * time.Second,
+		MaxIdle:     cacheConfig.MaxIdle,
+		IdleTimeout: time.Duration(cacheConfig.IdleTimeout) * time.Second,
 	}
 }
