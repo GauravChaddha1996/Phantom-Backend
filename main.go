@@ -15,17 +15,16 @@ import (
 func main() {
 
 	// Read config struct
-	conf := config.ReadConfig()
-	log.Println(conf)
+	envConfig := config.ReadEnvConfig()
 
-	// Open sql database conection
-	sqlDb := openSqlDB(conf)
+	// Open sql database connection
+	sqlDb := openSqlDB(envConfig)
 	defer func(db *sql.DB) {
 		_ = db.Close()
 	}(sqlDb)
 
 	// Open redis cache pool
-	redisCachePool := openRedisCachePool(conf)
+	redisCachePool := openRedisCachePool(envConfig)
 	defer func(pool *redis.Pool) {
 		_ = pool.Close()
 	}(redisCachePool)
@@ -38,15 +37,15 @@ func main() {
 	}
 
 	// Initialize router
-	_, routerInitErr := router.Initialize(conf)
+	_, routerInitErr := router.Initialize()
 	if routerInitErr != nil {
 		log.Fatal(routerInitErr)
 		return
 	}
 }
 
-func openSqlDB(config *config.Config) *sql.DB {
-	dbConfig := config.Database
+func openSqlDB(envConfig *config.EnvConfig) *sql.DB {
+	dbConfig := envConfig.Database
 	dataSourceName := fmt.Sprintf("%s:@%s(%s:%s)/%s", dbConfig.Username, dbConfig.Network, dbConfig.Host, dbConfig.Port, dbConfig.Name)
 	db, dbOpenErr := sql.Open(dbConfig.Driver, dataSourceName)
 	if dbOpenErr != nil {
@@ -55,8 +54,8 @@ func openSqlDB(config *config.Config) *sql.DB {
 	return db
 }
 
-func openRedisCachePool(config *config.Config) *redis.Pool {
-	cacheConfig := config.Cache
+func openRedisCachePool(envConfig *config.EnvConfig) *redis.Pool {
+	cacheConfig := envConfig.Cache
 	address := fmt.Sprintf("%s:%d", cacheConfig.Host, cacheConfig.Port)
 	return &redis.Pool{
 		Dial: func() (redis.Conn, error) {

@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RequestLoggerMiddleware() gin.HandlerFunc {
+func LoggerMiddleware() gin.HandlerFunc {
 	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
 		var statusColor, methodColor, resetColor string
 		statusColor = param.StatusCodeColor()
