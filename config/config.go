@@ -26,8 +26,8 @@ type EnvConfig struct {
 func ReadEnvConfig() *EnvConfig {
 	// Make viper and read envConfig
 	v := viper.New()
-	v.AddConfigPath("./envConfig/")
-	v.SetConfigName("envConfig")
+	v.AddConfigPath("./config/")
+	v.SetConfigName("config")
 	v.SetConfigType("json")
 	viperConfigReadErr := v.ReadInConfig()
 	if viperConfigReadErr != nil {
