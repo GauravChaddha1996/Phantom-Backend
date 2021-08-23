@@ -11,11 +11,11 @@ import (
 func PopulateCacheLayer(db *sql.DB, pool *redis.Pool) error {
 
 	productDao, categoryDao, propertyDao, propertyValueDao,
-	productToPropertyDao, categoryToPropertyDao := createDatabaseDaos(db)
+		productToPropertyDao, categoryToPropertyDao := createDatabaseDaos(db)
 
 	productsFromDb, categoriesFromDb, propertyValuesArr,
-	propertyArr, productToPropertyArr, categoryToPropertyArr,
-	readFromDbErr := readDataFromDatabase(productDao, categoryDao, propertyValueDao,
+		propertyArr, productToPropertyArr, categoryToPropertyArr,
+		readFromDbErr := readDataFromDatabase(productDao, categoryDao, propertyValueDao,
 		propertyDao, productToPropertyDao, categoryToPropertyDao)
 
 	if readFromDbErr != nil {
@@ -115,11 +115,9 @@ func populateAllProductIdsCache(pool *redis.Pool, productsFromDb *[]dbModels.Pro
 		return cacheDelErr
 	}
 
-	for _, product := range *productsFromDb {
-		cacheSetError := cacheDao.SetProductId(&product)
-		if cacheSetError != nil {
-			return cacheSetError
-		}
+	cacheSetError := cacheDao.SetProductIdsCache(productsFromDb)
+	if cacheSetError != nil {
+		return cacheSetError
 	}
 
 	return nil

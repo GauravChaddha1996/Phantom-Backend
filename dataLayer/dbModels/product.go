@@ -1,5 +1,7 @@
 package dbModels
 
+import "time"
+
 type Product struct {
 	Id               int64
 	BrandId          int64
@@ -9,4 +11,5 @@ type Product struct {
 	ShortDescription string
 	Cost             int64
 	CardImage        string
+	CreatedAt        *time.Time
 }

@@ -20,18 +20,20 @@ func (dao AllProductIdsRedisDao) DeleteWholeCache() error {
 	return nil
 }
 
-func (dao AllProductIdsRedisDao) SetProductId(product *dbModels.Product) error {
+func (dao AllProductIdsRedisDao) SetProductIdsCache(products *[]dbModels.Product) error {
 	conn := dao.Pool.Get()
-	_, err := conn.Do("SADD", AllProductIdCacheName, product.Id)
-	if err != nil {
-		return err
+	for _, product := range *products {
+		_, err := conn.Do("SADD", AllProductIdCacheName, product.Id)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 func (dao AllProductIdsRedisDao) ReadAllProductIds() (*[]string, error) {
 	conn := dao.Pool.Get()
-	productIds, err := redis.Strings(conn.Do("SMEMBERS", AllProductIdCacheName))
+	productIds, err := redis.Strings(conn.Do("SMEMBER", AllProductIdCacheName, 0, -1))
 	if err != nil {
 		return nil, err
 	}

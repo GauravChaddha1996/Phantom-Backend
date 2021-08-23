@@ -53,7 +53,7 @@ func (dao ProductSqlDao) ReadAllProducts() (*[]dbModels.Product, error) {
 		var product dbModels.Product
 		scanErr := rows.Scan(&product.Id, &product.BrandId, &product.CategoryId,
 			&product.Name, &product.LongDescription,
-			&product.ShortDescription, &product.Cost, &product.CardImage)
+			&product.ShortDescription, &product.Cost, &product.CardImage, &product.CreatedAt)
 		if scanErr == nil {
 			products = append(products, product)
 		}

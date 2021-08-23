@@ -46,7 +46,8 @@ func main() {
 
 func openSqlDB(envConfig *config.EnvConfig) *sql.DB {
 	dbConfig := envConfig.Database
-	dataSourceName := fmt.Sprintf("%s:@%s(%s:%s)/%s", dbConfig.Username, dbConfig.Network, dbConfig.Host, dbConfig.Port, dbConfig.Name)
+	dataSourceName := fmt.Sprintf("%s:@%s(%s:%s)/%s?parseTime=true",
+		dbConfig.Username, dbConfig.Network, dbConfig.Host, dbConfig.Port, dbConfig.Name)
 	db, dbOpenErr := sql.Open(dbConfig.Driver, dataSourceName)
 	if dbOpenErr != nil {
 		panic(dbOpenErr)
