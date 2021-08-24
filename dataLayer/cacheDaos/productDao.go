@@ -23,7 +23,7 @@ func (dao AllProductIdsRedisDao) DeleteWholeCache() error {
 func (dao AllProductIdsRedisDao) SetProductIdsCache(products *[]dbModels.Product) error {
 	conn := dao.Pool.Get()
 	for _, product := range *products {
-		_, err := conn.Do("SADD", AllProductIdCacheName, product.Id)
+		_, err := conn.Do("ZADD", AllProductIdCacheName, product.CreatedAt.Unix(), product.Id)
 		if err != nil {
 			return err
 		}
@@ -31,11 +31,29 @@ func (dao AllProductIdsRedisDao) SetProductIdsCache(products *[]dbModels.Product
 	return nil
 }
 
-func (dao AllProductIdsRedisDao) ReadAllProductIds() (*[]string, error) {
+func (dao AllProductIdsRedisDao) ReadAllProductIds() (*[]int64, error) {
 	conn := dao.Pool.Get()
-	productIds, err := redis.Strings(conn.Do("SMEMBER", AllProductIdCacheName, 0, -1))
+	productIds, err := redis.Int64s(conn.Do("ZRANGE", AllProductIdCacheName, 0, -1, "REV"))
 	if err != nil {
 		return nil, err
 	}
 	return &productIds, nil
+}
+
+func (dao AllProductIdsRedisDao) ReadFirstNProductIds(n int64) (*[]int64, error) {
+	conn := dao.Pool.Get()
+	productIds, err := redis.Int64s(conn.Do("ZRANGE", AllProductIdCacheName, 0, n-1, "REV"))
+	if err != nil {
+		return nil, err
+	}
+	return &productIds, nil
+}
+
+func (dao AllProductIdsRedisDao) ReadRandomProduct() (*int64, error) {
+	conn := dao.Pool.Get()
+	productId, err := redis.Int64(conn.Do("ZRANDMEMBER", AllProductIdCacheName))
+	if err != nil {
+		return nil, err
+	}
+	return &productId, nil
 }

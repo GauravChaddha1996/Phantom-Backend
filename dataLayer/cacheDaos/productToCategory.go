@@ -35,10 +35,10 @@ func (dao CategoryIdToProductIdRedisDao) SetCategoryIdsToProductIdsMap(productAr
 	return nil
 }
 
-func (dao CategoryIdToProductIdRedisDao) ReadAllProductsOfCategoryId(categoryId int64) (*[]int64, error) {
+func (dao CategoryIdToProductIdRedisDao) ReadNProductsOfCategoryId(categoryId *int64, n int) (*[]int64, error) {
 	conn := dao.Pool.Get()
-	key := CategoryIdToProductIdCacheName + ":" + strconv.FormatInt(categoryId, 10)
-	productIdsArr, readCacheErr := redis.Int64s(conn.Do("SMEMBERS", key))
+	key := CategoryIdToProductIdCacheName + ":" + strconv.FormatInt(*categoryId, 10)
+	productIdsArr, readCacheErr := redis.Int64s(conn.Do("SRANDMEMBER", key, n))
 	if readCacheErr != nil {
 		return nil, readCacheErr
 	}

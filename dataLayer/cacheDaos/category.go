@@ -31,9 +31,9 @@ func (dao AllCategoryIdsRedisDao) SetCategoryIds(categoryArr *[]dbModels.Categor
 	return nil
 }
 
-func (dao AllCategoryIdsRedisDao) ReadAllCategoryIds() (*[]string, error) {
+func (dao AllCategoryIdsRedisDao) ReadAllCategoryIds() (*[]int64, error) {
 	conn := dao.Pool.Get()
-	categoryIds, categoryIdsReadErr := redis.Strings(conn.Do("SMEMBERS", AllCategoryIdCacheName))
+	categoryIds, categoryIdsReadErr := redis.Int64s(conn.Do("SMEMBERS", AllCategoryIdCacheName))
 	if categoryIdsReadErr != nil {
 		return nil, categoryIdsReadErr
 	}

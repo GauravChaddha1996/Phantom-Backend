@@ -6,6 +6,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gomodule/redigo/redis"
 	"log"
+	"phantom/apis/home"
 	"phantom/config"
 	"phantom/dataLayer"
 	"phantom/router"
@@ -42,6 +43,8 @@ func main() {
 		log.Fatal(routerInitErr)
 		return
 	}
+
+	home.ApiHandler(redisCachePool)
 }
 
 func openSqlDB(envConfig *config.EnvConfig) *sql.DB {

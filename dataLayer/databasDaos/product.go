@@ -33,7 +33,7 @@ func (dao ProductSqlDao) ReadProduct(id int64) (*dbModels.Product, error) {
 
 	err = row.Scan(&product.Id, &product.BrandId, &product.CategoryId,
 		&product.Name, &product.LongDescription,
-		&product.ShortDescription, &product.Cost, &product.CardImage)
+		&product.ShortDescription, &product.Cost, &product.CardImage, &product.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
