@@ -8,13 +8,13 @@ const ProductDualSection = "product_dual_section"
 const CategoryRailSection = "category_rail_section"
 
 type SnippetSectionData struct {
-	Type       string
-	HeaderData *SnippetSectionHeaderData
-	Snippets   []BaseSnippet
+	Type       string                    `json:"type,omitempty"`
+	HeaderData *SnippetSectionHeaderData `json:"header_data,omitempty"`
+	Snippets   *[]BaseSnippet            `json:"snippets,omitempty"`
 }
 
 type SnippetSectionHeaderData struct {
-	Title       *atoms.TextData
-	Subtitle    *atoms.TextData
-	RightButton *atoms.ButtonData
+	Title       *atoms.TextData   `json:"title,omitempty"`
+	Subtitle    *atoms.TextData   `json:"subtitle,omitempty"`
+	RightButton *atoms.ButtonData `json:"right_button,omitempty"`
 }

@@ -1,110 +1,106 @@
 package home
 
 import (
+	"database/sql"
+	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
-	"log"
-	"math/rand"
 	"phantom/apis/apiCommons"
+	"phantom/apis/home/models"
+	"phantom/apis/home/section"
 	"phantom/dataLayer/cacheDaos"
+	"phantom/dataLayer/databasDaos"
+	"phantom/dataLayer/dbModels"
+	"phantom/dataLayer/uiModels/snippets"
+	"phantom/router"
 )
 
-func ApiHandler(redisCachePool *redis.Pool) {
-	log.Println("Starting home api handler")
+func ApiHandler(ctx *gin.Context) {
+	// Initialize or find dependencies
+	redisCachePool := ctx.MustGet(router.REDIS_POOL).(*redis.Pool)
+	db := ctx.MustGet(router.SQL_DB).(*sql.DB)
 	productCacheDao := &cacheDaos.AllProductIdsRedisDao{Pool: redisCachePool}
 	categoryCacheDao := &cacheDaos.AllCategoryIdsRedisDao{Pool: redisCachePool}
 	categoryToProductCacheDao := &cacheDaos.CategoryIdToProductIdRedisDao{Pool: redisCachePool}
 
-	productIdMap := apiCommons.NewProductIdMap(productCacheDao)
-	if productIdMap == nil {
-		return
-	}
+	// Get db results
+	apiDbResult := readFromDb(db)
+	productIdMap := apiCommons.NewProductIdMap(apiDbResult.ProductsMap)
 
-	newItemsProductRailSectionIds := newItemsProductRailSection(productCacheDao, productIdMap)
-	randomProductFullSectionId := randomProductFullSection(productCacheDao, productIdMap)
-	categoryRailSectionIds := categoryRailSection(categoryCacheDao)
-	categoryOneId, categoryTwoId := getTwoRandomCategoryId(categoryRailSectionIds)
-	categoryOneRailSectionIds := categoryToProductRailSection(categoryOneId, categoryToProductCacheDao, productIdMap)
-	categoryTwoRailSectionIds := categoryToProductRailSection(categoryTwoId, categoryToProductCacheDao, productIdMap)
-	randomSecondProductFullSectionId := randomProductFullSection(productCacheDao, productIdMap)
-	remainingDualProductSectionIds := productIdMap.RemainingProducts()
+	// Make all sections
+	newItemsProductRailSection := section.NewItemsProductRailSection(productCacheDao, productIdMap, apiDbResult)
+	randomProductFullSection := section.RandomProductFullSection(productCacheDao, productIdMap, apiDbResult)
+	categoryRailSection := section.CategoryRailSection(categoryCacheDao, apiDbResult)
+	categoryTOProductRailSections := section.CategoryToProductRailSections(categoryToProductCacheDao, productIdMap, apiDbResult)
+	randomProduct2FullSection := section.RandomProductFullSection(productCacheDao, productIdMap, apiDbResult)
+	remainingDualProductSection := section.RemainingProductsSection(productIdMap.RemainingProducts(), apiDbResult)
 
-	log.Println("newItemsProductRailSectionIds: ", newItemsProductRailSectionIds)
-	log.Println("randomProductFullSectionId: ", *randomProductFullSectionId)
-	log.Println("categoryRailSectionIds: ", categoryRailSectionIds)
-	log.Println("Category", *categoryOneId, ":", categoryOneRailSectionIds)
-	log.Println("Category", *categoryTwoId, ":", categoryTwoRailSectionIds)
-	if randomSecondProductFullSectionId != nil {
-		log.Println("randomSecondProductFullSectionId: ", *randomSecondProductFullSectionId)
+	// Arrange sections
+	var snippetSectionDataList []snippets.SnippetSectionData
+	snippetSectionDataList = append(snippetSectionDataList, newItemsProductRailSection)
+	snippetSectionDataList = append(snippetSectionDataList, randomProductFullSection)
+	snippetSectionDataList = append(snippetSectionDataList, categoryRailSection)
+	snippetSectionDataList = append(snippetSectionDataList, categoryTOProductRailSections...)
+	snippetSectionDataList = append(snippetSectionDataList, randomProduct2FullSection)
+	snippetSectionDataList = append(snippetSectionDataList, remainingDualProductSection)
+
+	homeApiResponse := models.HomeApiResponse{
+		Status:   "success",
+		Message:  "",
+		Snippets: snippetSectionDataList,
 	}
-	if remainingDualProductSectionIds != nil {
-		log.Println("remainingDualProductSectionIds: ", remainingDualProductSectionIds)
-	}
+	ctx.JSON(200, homeApiResponse)
 }
 
-func newItemsProductRailSection(
-	productCacheDao *cacheDaos.AllProductIdsRedisDao,
-	productToFetchFromDbIds *apiCommons.ProductIdMap,
-) *[]int64 {
-	productRailSectionIds, err := productCacheDao.ReadFirstNProductIds(2)
-	if err == nil {
-		productToFetchFromDbIds.PutAllInt64s(productRailSectionIds)
-	}
-	return productRailSectionIds
+func readFromDb(db *sql.DB) models.ApiDbResult {
+	productDbDao := databasDaos.ProductSqlDao{DB: db}
+	categoryDbDao := databasDaos.CategorySqlDao{DB: db}
+	brandDbDao := databasDaos.BrandSqlDao{DB: db}
+
+	productsChan := make(chan map[int64]*dbModels.Product, 1)
+	categoriesChan := make(chan map[int64]*dbModels.Category, 1)
+	brandsChan := make(chan map[int64]*dbModels.Brand, 1)
+
+	go func(productsChan chan map[int64]*dbModels.Product) {
+		products, _ := productDbDao.ReadAllProducts()
+		productsChan <- mapProducts(products)
+	}(productsChan)
+
+	go func(categoriesChan chan map[int64]*dbModels.Category) {
+		categories, _ := categoryDbDao.ReadAllCategories()
+		categoriesChan <- mapCategories(categories)
+	}(categoriesChan)
+
+	go func(brandsChan chan map[int64]*dbModels.Brand) {
+		brands, _ := brandDbDao.ReadAllBrands()
+		brandsChan <- mapBrands(brands)
+	}(brandsChan)
+
+	return models.ApiDbResult{ProductsMap: <-productsChan, CategoriesMap: <-categoriesChan, BrandsMap: <-brandsChan}
 }
 
-func randomProductFullSection(
-	productCacheDao *cacheDaos.AllProductIdsRedisDao,
-	productToFetchFromDbIds *apiCommons.ProductIdMap,
-) *int64 {
-	shouldContinue := true
-	totalIterations := 0
-	for shouldContinue && totalIterations < 20 {
-		totalIterations++
-		randomProductId, err := productCacheDao.ReadRandomProduct()
-		if err == nil {
-			if productToFetchFromDbIds.Contains(*randomProductId) == false {
-				shouldContinue = false
-				productToFetchFromDbIds.Put(*randomProductId)
-				return randomProductId
-			}
-		} else {
-			shouldContinue = false
-		}
+func mapProducts(products *[]dbModels.Product) map[int64]*dbModels.Product {
+	productMap := make(map[int64]*dbModels.Product, 0)
+	for index := range *products {
+		product := (*products)[index]
+		productMap[product.Id] = &product
 	}
-	return nil
+	return productMap
 }
 
-func categoryRailSection(categoryDao *cacheDaos.AllCategoryIdsRedisDao) *[]int64 {
-	allCategoryIds, err := categoryDao.ReadAllCategoryIds()
-	if err != nil {
-		return nil
+func mapCategories(categories *[]dbModels.Category) map[int64]*dbModels.Category {
+	categoryMap := make(map[int64]*dbModels.Category, 0)
+	for index := range *categories {
+		category := (*categories)[index]
+		categoryMap[category.Id] = &category
 	}
-	return allCategoryIds
+	return categoryMap
 }
 
-func getTwoRandomCategoryId(
-	categoryIds *[]int64,
-) (*int64, *int64) {
-	maxSize := len(*categoryIds)
-	indexOne := rand.Intn(maxSize)
-	indexTwo := indexOne
-	for indexTwo == indexOne {
-		indexTwo = rand.Intn(maxSize)
+func mapBrands(brands *[]dbModels.Brand) map[int64]*dbModels.Brand {
+	brandMap := make(map[int64]*dbModels.Brand, len(*brands))
+	for index := range *brands {
+		brand := (*brands)[index]
+		brandMap[brand.Id] = &brand
 	}
-	categoryOne := (*categoryIds)[indexOne]
-	categoryTwo := (*categoryIds)[indexTwo]
-	return &categoryOne, &categoryTwo
-}
-
-func categoryToProductRailSection(
-	categoryId *int64,
-	categoryToProductCacheDao *cacheDaos.CategoryIdToProductIdRedisDao,
-	productToFetchFromDbIds *apiCommons.ProductIdMap,
-) *[]int64 {
-	productsOfCategoryId, err := categoryToProductCacheDao.ReadNProductsOfCategoryId(categoryId, 1)
-	if err != nil {
-		return nil
-	}
-	productToFetchFromDbIds.PutAllInt64s(productsOfCategoryId)
-	return productsOfCategoryId
+	return brandMap
 }

@@ -1,19 +1,20 @@
 package apiCommons
 
-import "phantom/dataLayer/cacheDaos"
+import (
+	"phantom/dataLayer/dbModels"
+)
 
 type ProductIdMap struct {
 	data map[int64]bool
 }
 
-func NewProductIdMap(productCacheDao *cacheDaos.AllProductIdsRedisDao) *ProductIdMap {
-	allProductIds, err := productCacheDao.ReadAllProductIds()
-	if err != nil {
+func NewProductIdMap(products map[int64]*dbModels.Product) *ProductIdMap {
+	if products == nil {
 		return nil
 	}
 	dataMap := map[int64]bool{}
-	for _, productId := range *allProductIds {
-		dataMap[productId] = false
+	for key := range products {
+		dataMap[key] = false
 	}
 	productIdMap := ProductIdMap{data: dataMap}
 	return &productIdMap

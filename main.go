@@ -38,13 +38,19 @@ func main() {
 	}
 
 	// Initialize router
-	_, routerInitErr := router.Initialize()
+	gin, routerInitErr := router.Initialize(redisCachePool, sqlDb)
 	if routerInitErr != nil {
 		log.Fatal(routerInitErr)
 		return
 	}
 
-	home.ApiHandler(redisCachePool)
+	// Register routes in router
+	gin.GET("/home", home.ApiHandler)
+
+	err := gin.Run()
+	if err != nil {
+		return
+	}
 }
 
 func openSqlDB(envConfig *config.EnvConfig) *sql.DB {

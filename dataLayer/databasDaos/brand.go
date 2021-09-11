@@ -26,6 +26,27 @@ func (dao BrandSqlDao) ReadBrandName(id int64) (*string, error) {
 	return &brand.Name, nil
 }
 
+func (dao BrandSqlDao) ReadAllBrands() (*[]dbModels.Brand, error) {
+	var brands []dbModels.Brand
+	query := "Select * from brand"
+
+	rows, err := prepareAndExecuteSelectQuery(dao.DB, query)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var brand dbModels.Brand
+		err = rows.Scan(&brand.Id, &brand.Name, &brand.Description)
+		if err != nil {
+			return nil, err
+		}
+		brands = append(brands, brand)
+	}
+
+	return &brands, nil
+}
+
 func (dao BrandSqlDao) ReadBrandComplete(id int64) (*dbModels.Brand, error) {
 	var brand dbModels.Brand
 	query := "Select * from brand where id = ? limit 1"
