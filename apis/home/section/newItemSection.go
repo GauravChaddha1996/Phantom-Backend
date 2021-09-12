@@ -1,6 +1,7 @@
 package section
 
 import (
+	"github.com/gin-gonic/gin"
 	"phantom/apis/apiCommons"
 	"phantom/apis/home/models"
 	"phantom/dataLayer/cacheDaos"
@@ -12,22 +13,27 @@ const newlyIntroducedSectionItemCount = 2
 const newlyIntroducedSectionHeader = "Newly introduced"
 
 func NewItemsProductRailSection(
+	ctx *gin.Context,
 	productCacheDao *cacheDaos.AllProductIdsRedisDao,
 	productIdMap *apiCommons.ProductIdMap,
 	apiDbResult models.ApiDbResult,
-) snippets.SnippetSectionData {
+) *snippets.SnippetSectionData {
 	var productRailSnippets []snippets.ProductRailSnippet
 
 	productIds, err := productCacheDao.ReadFirstNProductIds(newlyIntroducedSectionItemCount)
-	if err == nil {
-		productIdMap.PutAllInt64s(productIds)
-		for _, productId := range *productIds {
-			snippet := getProductRailSnippet(productId, apiDbResult)
-			productRailSnippets = append(productRailSnippets, snippet)
-		}
+	if err != nil {
+		logData := apiCommons.NewApiErrorLogData(ctx, "Error reading first n products from cache", err)
+		apiCommons.LogApiError(logData)
+		return nil
 	}
 
-	return snippets.SnippetSectionData{
+	productIdMap.PutAllInt64s(productIds)
+	for _, productId := range *productIds {
+		snippet := getProductRailSnippet(productId, apiDbResult)
+		productRailSnippets = append(productRailSnippets, snippet)
+	}
+
+	return &snippets.SnippetSectionData{
 		Type: snippets.ProductRailSection,
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title: &atoms.TextData{Text: newlyIntroducedSectionHeader},

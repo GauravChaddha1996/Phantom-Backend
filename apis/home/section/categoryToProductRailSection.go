@@ -1,25 +1,28 @@
 package section
 
 import (
+	"github.com/gin-gonic/gin"
 	"phantom/apis/apiCommons"
 	"phantom/apis/home/models"
 	"phantom/dataLayer/cacheDaos"
 	"phantom/dataLayer/dbModels"
 	"phantom/dataLayer/uiModels/atoms"
 	"phantom/dataLayer/uiModels/snippets"
+	"strconv"
 )
 
 const categoryToProductRailSectionCount = 1
 
 func CategoryToProductRailSections(
+	ctx *gin.Context,
 	categoryToProductCacheDao *cacheDaos.CategoryIdToProductIdRedisDao,
 	productIdMap *apiCommons.ProductIdMap,
 	apiDbResult models.ApiDbResult,
-) []snippets.SnippetSectionData {
+) []*snippets.SnippetSectionData {
 	categoryOne, categoryTwo := getTwoRandomCategories(apiDbResult.CategoriesMap)
-	categoryOneRailSection := categoryToProductRailSection(categoryOne, categoryToProductCacheDao, productIdMap, apiDbResult)
-	categoryTwoRailSection := categoryToProductRailSection(categoryTwo, categoryToProductCacheDao, productIdMap, apiDbResult)
-	return []snippets.SnippetSectionData{categoryOneRailSection, categoryTwoRailSection}
+	categoryOneRailSection := categoryToProductRailSection(ctx, categoryOne, categoryToProductCacheDao, productIdMap, apiDbResult)
+	categoryTwoRailSection := categoryToProductRailSection(ctx, categoryTwo, categoryToProductCacheDao, productIdMap, apiDbResult)
+	return []*snippets.SnippetSectionData{categoryOneRailSection, categoryTwoRailSection}
 }
 
 func getTwoRandomCategories(categoryIdMap map[int64]*dbModels.Category) (*dbModels.Category, *dbModels.Category) {
@@ -40,22 +43,27 @@ func getTwoRandomCategories(categoryIdMap map[int64]*dbModels.Category) (*dbMode
 }
 
 func categoryToProductRailSection(
+	ctx *gin.Context,
 	category *dbModels.Category,
 	categoryToProductCacheDao *cacheDaos.CategoryIdToProductIdRedisDao,
 	productIdMap *apiCommons.ProductIdMap,
 	apiDbResult models.ApiDbResult,
-) snippets.SnippetSectionData {
+) *snippets.SnippetSectionData {
 	var productsOfCategorySnippets []snippets.ProductRailSnippet
 
 	productsOfCategoryId, err := categoryToProductCacheDao.ReadNProductsOfCategoryId(&category.Id, categoryToProductRailSectionCount)
-	if err == nil {
-		productIdMap.PutAllInt64s(productsOfCategoryId)
-		for _, productId := range *productsOfCategoryId {
-			snippet := getProductRailSnippet(productId, apiDbResult)
-			productsOfCategorySnippets = append(productsOfCategorySnippets, snippet)
-		}
+	if err != nil {
+		logData := apiCommons.NewApiErrorLogData(ctx, "Error reading first N Products of category from cache", err)
+		logData.Data["category_id"] = strconv.FormatInt(category.Id, 10)
+		apiCommons.LogApiError(logData)
+		return nil
 	}
-	return snippets.SnippetSectionData{
+	productIdMap.PutAllInt64s(productsOfCategoryId)
+	for _, productId := range *productsOfCategoryId {
+		snippet := getProductRailSnippet(productId, apiDbResult)
+		productsOfCategorySnippets = append(productsOfCategorySnippets, snippet)
+	}
+	return &snippets.SnippetSectionData{
 		Type: snippets.ProductRailSection,
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title: &atoms.TextData{Text: category.Name},

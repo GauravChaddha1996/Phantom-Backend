@@ -10,8 +10,9 @@ import (
 const remainingProductSectionHeader = "Exciting products!"
 
 func RemainingProductsSection(
-	remainingProductIds *[]int64, apiDbResult models.ApiDbResult,
-) snippets.SnippetSectionData {
+	remainingProductIds *[]int64,
+	apiDbResult models.ApiDbResult,
+) *snippets.SnippetSectionData {
 
 	var productDualSnippets []snippets.ProductDualSnippet
 	for _, productId := range *remainingProductIds {
@@ -19,7 +20,7 @@ func RemainingProductsSection(
 		productDualSnippets = append(productDualSnippets, snippet)
 	}
 
-	return snippets.SnippetSectionData{
+	return &snippets.SnippetSectionData{
 		Type: snippets.ProductDualSection,
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title:       &atoms.TextData{Text: remainingProductSectionHeader},

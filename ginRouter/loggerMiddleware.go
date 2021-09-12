@@ -17,6 +17,6 @@ func LoggerMiddleware() gin.HandlerFunc {
 			methodColor, param.Method, resetColor,
 			param.Path,
 			param.Latency.String(),
-		)
+		) + "\n"
 	})
 }

@@ -1,6 +1,7 @@
 package section
 
 import (
+	"github.com/gin-gonic/gin"
 	"phantom/apis/apiCommons"
 	"phantom/apis/home/models"
 	"phantom/dataLayer/cacheDaos"
@@ -10,25 +11,31 @@ import (
 const randomProductSectionMaxIteration = 20
 
 func RandomProductFullSection(
+	ctx *gin.Context,
 	productCacheDao *cacheDaos.AllProductIdsRedisDao,
 	productIdMap *apiCommons.ProductIdMap,
 	apiDbResult models.ApiDbResult,
-) snippets.SnippetSectionData {
+) *snippets.SnippetSectionData {
 	var productFullSnippets []snippets.ProductFullSnippet
 
-	randomProductId := findRandomProductId(productCacheDao, productIdMap)
-	if randomProductId != nil {
-		snippet := getProductFullSnippet(*randomProductId, apiDbResult)
-		productFullSnippets = append(productFullSnippets, snippet)
+	randomProductId := findRandomProductId(ctx, productCacheDao, productIdMap)
+	if randomProductId == nil {
+		logData := apiCommons.NewApiErrorLogData(ctx, "Error finding random product id", nil)
+		apiCommons.LogApiError(logData)
+		return nil
 	}
 
-	return snippets.SnippetSectionData{
+	snippet := getProductFullSnippet(*randomProductId, apiDbResult)
+	productFullSnippets = append(productFullSnippets, snippet)
+
+	return &snippets.SnippetSectionData{
 		Type:     snippets.ProductFullSection,
 		Snippets: apiCommons.ToBaseSnippets(productFullSnippets),
 	}
 }
 
 func findRandomProductId(
+	ctx *gin.Context,
 	productCacheDao *cacheDaos.AllProductIdsRedisDao,
 	productIdMap *apiCommons.ProductIdMap,
 ) *int64 {
@@ -45,6 +52,8 @@ func findRandomProductId(
 				return randomProductId
 			}
 		} else {
+			logData := apiCommons.NewApiErrorLogData(ctx, "Error reading random product from cache", err)
+			apiCommons.LogApiError(logData)
 			isRandomProductIdNotFound = false
 		}
 	}
