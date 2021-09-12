@@ -2,6 +2,7 @@ package databasDaos
 
 import (
 	"database/sql"
+	"github.com/hashicorp/go-multierror"
 	"phantom/dataLayer/dbModels"
 )
 
@@ -25,15 +26,17 @@ func (dao CategoryToPropertySqlDao) ReadAllCategoryToPropertyMapping() (*[]dbMod
 	if err != nil {
 		return nil, err
 	}
+	var allRowScanErrs error
 	for rows.Next() {
 		var data dbModels.CategoryToProperty
-		scanErr := rows.Scan(&data.CategoryId, &data.PropertyId)
-		if scanErr != nil {
-			return nil, scanErr
+		rowScanErr := rows.Scan(&data.CategoryId, &data.PropertyId)
+		if rowScanErr != nil {
+			allRowScanErrs = multierror.Append(allRowScanErrs, rowScanErr)
+			continue
 		}
 		dataArr = append(dataArr, data)
 	}
-	return &dataArr, nil
+	return &dataArr, allRowScanErrs
 }
 
 func (dao CategoryToPropertySqlDao) ReadCategoryToPropertyMappingForCategoryId(categoryId int64) (*[]int64, error) {
@@ -43,13 +46,15 @@ func (dao CategoryToPropertySqlDao) ReadCategoryToPropertyMappingForCategoryId(c
 	if err != nil {
 		return nil, err
 	}
+	var allRowScanErrs error
 	for rows.Next() {
 		var propertyId int64
-		scanErr := rows.Scan(&propertyId)
-		if scanErr != nil {
-			return nil, scanErr
+		rowScanErr := rows.Scan(&propertyId)
+		if rowScanErr != nil {
+			allRowScanErrs = multierror.Append(allRowScanErrs, rowScanErr)
+			continue
 		}
 		propertyIdArr = append(propertyIdArr, propertyId)
 	}
-	return &propertyIdArr, nil
+	return &propertyIdArr, allRowScanErrs
 }

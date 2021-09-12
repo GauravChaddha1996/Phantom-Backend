@@ -11,13 +11,13 @@ import (
 	"phantom/dataLayer/databasDaos"
 	"phantom/dataLayer/dbModels"
 	"phantom/dataLayer/uiModels/snippets"
-	"phantom/router"
+	"phantom/ginRouter"
 )
 
 func ApiHandler(ctx *gin.Context) {
 	// Initialize or find dependencies
-	redisCachePool := ctx.MustGet(router.REDIS_POOL).(*redis.Pool)
-	db := ctx.MustGet(router.SQL_DB).(*sql.DB)
+	redisCachePool := ctx.MustGet(ginRouter.REDIS_POOL).(*redis.Pool)
+	db := ctx.MustGet(ginRouter.SQL_DB).(*sql.DB)
 	productCacheDao := &cacheDaos.AllProductIdsRedisDao{Pool: redisCachePool}
 	categoryCacheDao := &cacheDaos.AllCategoryIdsRedisDao{Pool: redisCachePool}
 	categoryToProductCacheDao := &cacheDaos.CategoryIdToProductIdRedisDao{Pool: redisCachePool}

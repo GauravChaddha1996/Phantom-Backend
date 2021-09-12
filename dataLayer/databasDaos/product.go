@@ -2,6 +2,7 @@ package databasDaos
 
 import (
 	"database/sql"
+	"github.com/hashicorp/go-multierror"
 	"phantom/dataLayer/dbModels"
 )
 
@@ -49,14 +50,17 @@ func (dao ProductSqlDao) ReadAllProducts() (*[]dbModels.Product, error) {
 		return nil, err
 	}
 
+	var allRowScanErrs error
 	for rows.Next() {
 		var product dbModels.Product
-		scanErr := rows.Scan(&product.Id, &product.BrandId, &product.CategoryId,
+		rowScanErr := rows.Scan(&product.Id, &product.BrandId, &product.CategoryId,
 			&product.Name, &product.LongDescription,
 			&product.ShortDescription, &product.Cost, &product.CardImage, &product.CreatedAt)
-		if scanErr == nil {
-			products = append(products, product)
+		if rowScanErr != nil {
+			allRowScanErrs = multierror.Append(allRowScanErrs, rowScanErr)
+			continue
 		}
+		products = append(products, product)
 	}
-	return &products, err
+	return &products, allRowScanErrs
 }

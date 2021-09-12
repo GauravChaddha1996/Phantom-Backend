@@ -9,7 +9,7 @@ import (
 	"phantom/apis/home"
 	"phantom/config"
 	"phantom/dataLayer"
-	"phantom/router"
+	"phantom/ginRouter"
 	"time"
 )
 
@@ -21,13 +21,19 @@ func main() {
 	// Open sql database connection
 	sqlDb := openSqlDB(envConfig)
 	defer func(db *sql.DB) {
-		_ = db.Close()
+		dbCloseErr := db.Close()
+		if dbCloseErr != nil {
+			log.Fatal(dbCloseErr)
+		}
 	}(sqlDb)
 
 	// Open redis cache pool
 	redisCachePool := openRedisCachePool(envConfig)
 	defer func(pool *redis.Pool) {
-		_ = pool.Close()
+		redisCloseErr := pool.Close()
+		if redisCloseErr != nil {
+			log.Fatal(redisCloseErr)
+		}
 	}(redisCachePool)
 
 	// Pre-populate redis cache pool
@@ -37,17 +43,18 @@ func main() {
 		return
 	}
 
-	// Initialize router
-	gin, routerInitErr := router.Initialize(redisCachePool, sqlDb)
+	// Initialize ginRouter
+	router, routerInitErr := ginRouter.Initialize(redisCachePool, sqlDb)
 	if routerInitErr != nil {
 		log.Fatal(routerInitErr)
 		return
 	}
 
 	// Register routes in router
-	gin.GET("/home", home.ApiHandler)
+	router.GET("/home", home.ApiHandler)
 
-	err := gin.Run()
+	// Start router
+	err := router.Run()
 	if err != nil {
 		return
 	}

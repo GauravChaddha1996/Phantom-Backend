@@ -2,6 +2,7 @@ package cacheDaos
 
 import (
 	"github.com/gomodule/redigo/redis"
+	"github.com/hashicorp/go-multierror"
 	"phantom/dataLayer/dbModels"
 	"strconv"
 )
@@ -16,9 +17,9 @@ func (dao ProductToPropertyValueRedisDao) DeleteWholeCache(products *[]dbModels.
 	conn := dao.Pool.Get()
 
 	for _, product := range *products {
-		_, err := conn.Do("DEL", ProductIdToPropertyValueIdCacheName+":"+strconv.FormatInt(product.Id, 10))
-		if err != nil {
-			return err
+		_, delErr := conn.Do("DEL", ProductIdToPropertyValueIdCacheName+":"+strconv.FormatInt(product.Id, 10))
+		if delErr != nil {
+			return delErr
 		}
 	}
 	return nil
@@ -26,14 +27,15 @@ func (dao ProductToPropertyValueRedisDao) DeleteWholeCache(products *[]dbModels.
 
 func (dao ProductToPropertyValueRedisDao) SetProductIdsToPropertyValues(dataArr *[]dbModels.ProductToProperty) error {
 	conn := dao.Pool.Get()
+	var err error
 	for _, productToProperty := range *dataArr {
 		key := ProductIdToPropertyValueIdCacheName + ":" + strconv.FormatInt(productToProperty.ProductId, 10)
-		_, err := conn.Do("SADD", key, productToProperty.ValueId)
-		if err != nil {
-			return err
+		_, setErr := conn.Do("SADD", key, productToProperty.ValueId)
+		if setErr != nil {
+			err = multierror.Append(err, setErr)
 		}
 	}
-	return nil
+	return err
 }
 
 func (dao ProductToPropertyValueRedisDao) ReadPropertyValueIdsOfProduct(productId int64) (*[]int64, error) {

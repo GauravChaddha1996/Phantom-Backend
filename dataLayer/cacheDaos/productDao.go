@@ -2,6 +2,7 @@ package cacheDaos
 
 import (
 	"github.com/gomodule/redigo/redis"
+	"github.com/hashicorp/go-multierror"
 	"phantom/dataLayer/dbModels"
 )
 
@@ -13,47 +14,49 @@ type AllProductIdsRedisDao struct {
 
 func (dao AllProductIdsRedisDao) DeleteWholeCache() error {
 	conn := dao.Pool.Get()
-	_, err := conn.Do("DEL", AllProductIdCacheName)
-	if err != nil {
-		return err
+	_, delErr := conn.Do("DEL", AllProductIdCacheName)
+	if delErr != nil {
+		return delErr
 	}
 	return nil
 }
 
 func (dao AllProductIdsRedisDao) SetProductIdsCache(products *[]dbModels.Product) error {
 	conn := dao.Pool.Get()
+	var err error
 	for _, product := range *products {
-		_, err := conn.Do("ZADD", AllProductIdCacheName, product.CreatedAt.Unix(), product.Id)
-		if err != nil {
-			return err
+		_, setErr := conn.Do("ZADD", AllProductIdCacheName, product.CreatedAt.Unix(), product.Id)
+		if setErr != nil {
+			err = multierror.Append(err, setErr)
+
 		}
 	}
-	return nil
+	return err
 }
 
 func (dao AllProductIdsRedisDao) ReadAllProductIds() (*[]int64, error) {
 	conn := dao.Pool.Get()
-	productIds, err := redis.Int64s(conn.Do("ZRANGE", AllProductIdCacheName, 0, -1, "REV"))
-	if err != nil {
-		return nil, err
+	productIds, readErr := redis.Int64s(conn.Do("ZRANGE", AllProductIdCacheName, 0, -1, "REV"))
+	if readErr != nil {
+		return nil, readErr
 	}
 	return &productIds, nil
 }
 
 func (dao AllProductIdsRedisDao) ReadFirstNProductIds(n int64) (*[]int64, error) {
 	conn := dao.Pool.Get()
-	productIds, err := redis.Int64s(conn.Do("ZRANGE", AllProductIdCacheName, 0, n-1, "REV"))
-	if err != nil {
-		return nil, err
+	productIds, readErr := redis.Int64s(conn.Do("ZRANGE", AllProductIdCacheName, 0, n-1, "REV"))
+	if readErr != nil {
+		return nil, readErr
 	}
 	return &productIds, nil
 }
 
 func (dao AllProductIdsRedisDao) ReadRandomProduct() (*int64, error) {
 	conn := dao.Pool.Get()
-	productId, err := redis.Int64(conn.Do("ZRANDMEMBER", AllProductIdCacheName))
-	if err != nil {
-		return nil, err
+	productId, readErr := redis.Int64(conn.Do("ZRANDMEMBER", AllProductIdCacheName))
+	if readErr != nil {
+		return nil, readErr
 	}
 	return &productId, nil
 }

@@ -2,6 +2,7 @@ package databasDaos
 
 import (
 	"database/sql"
+	"github.com/hashicorp/go-multierror"
 	"phantom/dataLayer/dbModels"
 )
 
@@ -44,13 +45,15 @@ func (dao PropertySqlDao) ReadAllProperty() (*[]dbModels.Property, error) {
 
 	var propertyArr []dbModels.Property
 
+	var allRowScanErrs error
 	for rows.Next() {
 		var property dbModels.Property
-		err = rows.Scan(&property.Id, &property.Name)
-		if err != nil {
-			return nil, err
+		rowScanErr := rows.Scan(&property.Id, &property.Name)
+		if rowScanErr != nil {
+			allRowScanErrs = multierror.Append(allRowScanErrs, rowScanErr)
+			continue
 		}
 		propertyArr = append(propertyArr, property)
 	}
-	return &propertyArr, err
+	return &propertyArr, allRowScanErrs
 }

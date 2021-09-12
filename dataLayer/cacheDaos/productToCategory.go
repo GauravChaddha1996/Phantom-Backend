@@ -2,6 +2,7 @@ package cacheDaos
 
 import (
 	"github.com/gomodule/redigo/redis"
+	"github.com/hashicorp/go-multierror"
 	"phantom/dataLayer/dbModels"
 	"strconv"
 )
@@ -15,9 +16,9 @@ type CategoryIdToProductIdRedisDao struct {
 func (dao CategoryIdToProductIdRedisDao) DeleteWholeCache(categoriesFromDb *[]dbModels.Category) error {
 	conn := dao.Pool.Get()
 	for _, category := range *categoriesFromDb {
-		_, err := conn.Do("DEL", CategoryIdToProductIdCacheName+":"+strconv.FormatInt(category.Id, 10))
-		if err != nil {
-			return err
+		_, delErr := conn.Do("DEL", CategoryIdToProductIdCacheName+":"+strconv.FormatInt(category.Id, 10))
+		if delErr != nil {
+			return delErr
 		}
 	}
 	return nil
@@ -25,14 +26,15 @@ func (dao CategoryIdToProductIdRedisDao) DeleteWholeCache(categoriesFromDb *[]db
 
 func (dao CategoryIdToProductIdRedisDao) SetCategoryIdsToProductIdsMap(productArr *[]dbModels.Product) error {
 	conn := dao.Pool.Get()
+	var err error
 	for _, product := range *productArr {
 		key := CategoryIdToProductIdCacheName + ":" + strconv.FormatInt(product.CategoryId, 10)
 		_, categoryIdSetErr := conn.Do("SADD", key, product.Id)
 		if categoryIdSetErr != nil {
-			return categoryIdSetErr
+			err = multierror.Append(err, categoryIdSetErr)
 		}
 	}
-	return nil
+	return err
 }
 
 func (dao CategoryIdToProductIdRedisDao) ReadNProductsOfCategoryId(categoryId *int64, n int) (*[]int64, error) {

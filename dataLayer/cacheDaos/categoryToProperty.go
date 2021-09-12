@@ -2,6 +2,7 @@ package cacheDaos
 
 import (
 	"github.com/gomodule/redigo/redis"
+	"github.com/hashicorp/go-multierror"
 	"phantom/dataLayer/dbModels"
 	"strconv"
 )
@@ -26,22 +27,23 @@ func (dao CategoryIdToPropertyIdRedisDao) DeleteWholeCache(categoryArr *[]dbMode
 
 func (dao CategoryIdToPropertyIdRedisDao) SetCategoryToPropertyCache(dataArr *[]dbModels.CategoryToProperty) error {
 	conn := dao.Pool.Get()
+	var err error
 	for _, categoryToProperty := range *dataArr {
 		key := CategoryIdToPropertyIdCacheName + ":" + strconv.FormatInt(categoryToProperty.CategoryId, 10)
-		_, err := conn.Do("SADD", key, categoryToProperty.PropertyId)
-		if err != nil {
-			return err
+		_, categorySetErr := conn.Do("SADD", key, categoryToProperty.PropertyId)
+		if categorySetErr != nil {
+			err = multierror.Append(err, categorySetErr)
 		}
 	}
-	return nil
+	return err
 }
 
 func (dao CategoryIdToPropertyIdRedisDao) ReadPropertyIdsForCategoryId(categoryId int64) (*[]int64, error) {
 	conn := dao.Pool.Get()
 	key := CategoryIdToPropertyIdCacheName + ":" + strconv.FormatInt(categoryId, 10)
-	propertyIds, err := redis.Int64s(conn.Do("SMEMBERS", key))
-	if err != nil {
-		return nil, err
+	propertyIds, readErr := redis.Int64s(conn.Do("SMEMBERS", key))
+	if readErr != nil {
+		return nil, readErr
 	}
 	return &propertyIds, nil
 }

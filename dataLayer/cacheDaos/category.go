@@ -2,6 +2,7 @@ package cacheDaos
 
 import (
 	"github.com/gomodule/redigo/redis"
+	"github.com/hashicorp/go-multierror"
 	"phantom/dataLayer/dbModels"
 )
 
@@ -22,13 +23,14 @@ func (dao AllCategoryIdsRedisDao) DeleteWholeCache() error {
 
 func (dao AllCategoryIdsRedisDao) SetCategoryIds(categoryArr *[]dbModels.Category) error {
 	conn := dao.Pool.Get()
+	var err error
 	for _, category := range *categoryArr {
 		_, categorySetErr := conn.Do("SADD", AllCategoryIdCacheName, category.Id)
 		if categorySetErr != nil {
-			return categorySetErr
+			err = multierror.Append(err, categorySetErr)
 		}
 	}
-	return nil
+	return err
 }
 
 func (dao AllCategoryIdsRedisDao) ReadAllCategoryIds() (*[]int64, error) {

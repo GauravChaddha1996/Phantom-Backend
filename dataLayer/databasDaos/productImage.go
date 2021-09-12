@@ -2,6 +2,7 @@ package databasDaos
 
 import (
 	"database/sql"
+	"github.com/hashicorp/go-multierror"
 	"phantom/dataLayer/dbModels"
 )
 
@@ -28,13 +29,15 @@ func (dao ProductImageSqlDao) ReadProductImages(productId int64) ([]*dbModels.Pr
 	}
 	defer closeRows(rows)
 
+	var allRowScanErrs error
 	for rows.Next() {
 		var image dbModels.ProductImage
-		err = rows.Scan(&image.ProductId, &image.Url)
-		if err != nil {
+		rowScanErr := rows.Scan(&image.ProductId, &image.Url)
+		if rowScanErr != nil {
+			allRowScanErrs = multierror.Append(allRowScanErrs, rowScanErr)
 			continue
 		}
 		images = append(images, &image)
 	}
-	return images, err
+	return images, allRowScanErrs
 }

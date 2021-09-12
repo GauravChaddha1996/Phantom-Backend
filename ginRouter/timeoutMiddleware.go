@@ -1,4 +1,4 @@
-package router
+package ginRouter
 
 import (
 	"context"

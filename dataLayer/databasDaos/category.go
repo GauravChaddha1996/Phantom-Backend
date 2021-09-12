@@ -2,6 +2,7 @@ package databasDaos
 
 import (
 	"database/sql"
+	"github.com/hashicorp/go-multierror"
 	"phantom/dataLayer/dbModels"
 )
 
@@ -50,14 +51,15 @@ func (dao CategorySqlDao) ReadAllCategories() (*[]dbModels.Category, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	var allRowScanErrs error
 	for rows.Next() {
 		var category dbModels.Category
-		rowReadErr := rows.Scan(&category.Id, &category.Name, &category.Description)
-		if rowReadErr != nil {
-			return nil, rowReadErr
+		rowScanErr := rows.Scan(&category.Id, &category.Name, &category.Description)
+		if rowScanErr != nil {
+			allRowScanErrs = multierror.Append(allRowScanErrs, rowScanErr)
+			continue
 		}
 		categoryArr = append(categoryArr, category)
 	}
-	return &categoryArr, nil
+	return &categoryArr, allRowScanErrs
 }

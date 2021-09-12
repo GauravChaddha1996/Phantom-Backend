@@ -2,6 +2,7 @@ package databasDaos
 
 import (
 	"database/sql"
+	"github.com/hashicorp/go-multierror"
 	"phantom/dataLayer/dbModels"
 )
 
@@ -28,15 +29,17 @@ func (dao ProductToPropertySqlDao) ReadAllProductToPropertyMappingForProductId(p
 	}
 	defer closeRows(rows)
 
+	var allRowScanErrs error
 	for rows.Next() {
 		var mapping dbModels.ProductToProperty
-		rowErr := rows.Scan(&mapping.ProductId, &mapping.PropertyId, &mapping.ValueId)
-		if rowErr != nil {
+		rowScanErr := rows.Scan(&mapping.ProductId, &mapping.PropertyId, &mapping.ValueId)
+		if rowScanErr != nil {
+			allRowScanErrs = multierror.Append(allRowScanErrs, rowScanErr)
 			continue
 		}
 		mappingArr = append(mappingArr, mapping)
 	}
-	return &mappingArr, queryErr
+	return &mappingArr, allRowScanErrs
 }
 
 func (dao ProductToPropertySqlDao) ReadAllProductToPropertyMapping() (*[]dbModels.ProductToProperty, error) {
@@ -49,10 +52,12 @@ func (dao ProductToPropertySqlDao) ReadAllProductToPropertyMapping() (*[]dbModel
 	}
 	defer closeRows(rows)
 
+	var allRowScanErrs error
 	for rows.Next() {
 		var mapping dbModels.ProductToProperty
-		rowErr := rows.Scan(&mapping.ProductId, &mapping.PropertyId, &mapping.ValueId)
-		if rowErr != nil {
+		rowScanErr := rows.Scan(&mapping.ProductId, &mapping.PropertyId, &mapping.ValueId)
+		if rowScanErr != nil {
+			allRowScanErrs = multierror.Append(allRowScanErrs, rowScanErr)
 			continue
 		}
 		mappingArr = append(mappingArr, mapping)
