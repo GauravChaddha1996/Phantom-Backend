@@ -5,7 +5,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"go.uber.org/multierr"
 	"phantom/dataLayer/cacheDaos"
-	"phantom/dataLayer/databasDaos"
+	"phantom/dataLayer/databaseDaos"
 	"phantom/dataLayer/dbModels"
 )
 
@@ -15,12 +15,12 @@ func PopulateCacheLayer(
 ) error {
 
 	// Make DAOs
-	productDao := databasDaos.ProductSqlDao{DB: db}
-	categoryDao := databasDaos.CategorySqlDao{DB: db}
-	propertyDao := databasDaos.PropertySqlDao{DB: db}
-	propertyValueDao := databasDaos.PropertyValueSqlDao{DB: db}
-	productToPropertyDao := databasDaos.ProductToPropertySqlDao{DB: db}
-	categoryToPropertyDao := databasDaos.CategoryToPropertySqlDao{DB: db}
+	productDao := databaseDaos.ProductSqlDao{DB: db}
+	categoryDao := databaseDaos.CategorySqlDao{DB: db}
+	propertyDao := databaseDaos.PropertySqlDao{DB: db}
+	propertyValueDao := databaseDaos.PropertyValueSqlDao{DB: db}
+	productToPropertyDao := databaseDaos.ProductToPropertySqlDao{DB: db}
+	categoryToPropertyDao := databaseDaos.CategoryToPropertySqlDao{DB: db}
 
 	// Read from Database
 	var dbReadError error

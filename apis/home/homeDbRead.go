@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"phantom/apis/apiCommons"
 	"phantom/apis/home/models"
-	"phantom/dataLayer/databasDaos"
+	"phantom/dataLayer/databaseDaos"
 	"phantom/dataLayer/dbModels"
 	"phantom/ginRouter"
 	"sync"
@@ -65,7 +65,7 @@ func readProductsFromDb(
 	wg *sync.WaitGroup,
 ) map[int64]*dbModels.Product {
 	defer wg.Done()
-	productDbDao := databasDaos.ProductSqlDao{DB: db}
+	productDbDao := databaseDaos.ProductSqlDao{DB: db}
 	products, err := productDbDao.ReadAllProducts()
 	if err != nil {
 		logData := apiCommons.NewApiErrorLogData(ctx, "Error reading all products from db", err)
@@ -89,7 +89,7 @@ func readCategoriesFromDb(
 	wg *sync.WaitGroup,
 ) map[int64]*dbModels.Category {
 	defer wg.Done()
-	categoryDbDao := databasDaos.CategorySqlDao{DB: db}
+	categoryDbDao := databaseDaos.CategorySqlDao{DB: db}
 	categories, err := categoryDbDao.ReadAllCategories()
 	if err != nil {
 		logData := apiCommons.NewApiErrorLogData(ctx, "Error reading all categories from db", err)
@@ -113,7 +113,7 @@ func readBrandsFromDb(
 	wg *sync.WaitGroup,
 ) map[int64]*dbModels.Brand {
 	defer wg.Done()
-	brandDbDao := databasDaos.BrandSqlDao{DB: db}
+	brandDbDao := databaseDaos.BrandSqlDao{DB: db}
 	brands, err := brandDbDao.ReadAllBrands()
 	if err != nil {
 		logData := apiCommons.NewApiErrorLogData(ctx, "Error reading all brands from db", err)
