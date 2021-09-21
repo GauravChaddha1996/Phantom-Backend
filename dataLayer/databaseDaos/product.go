@@ -3,7 +3,9 @@ package databaseDaos
 import (
 	"database/sql"
 	"github.com/hashicorp/go-multierror"
+	"phantom/apis/apiCommons"
 	"phantom/dataLayer/dbModels"
+	"strings"
 )
 
 type ProductSqlDao struct {
@@ -42,10 +44,16 @@ func (dao ProductSqlDao) ReadProduct(id int64) (*dbModels.Product, error) {
 }
 
 func (dao ProductSqlDao) ReadAllProducts() (*[]dbModels.Product, error) {
+	return dao.ReadProducts([]int64{})
+}
+
+func (dao ProductSqlDao) ReadProducts(ids []int64) (*[]dbModels.Product, error) {
 	var products []dbModels.Product
 	query := "Select * from product"
-
-	rows, err := prepareAndExecuteSelectQuery(dao.DB, query)
+	if len(ids) != 0 {
+		query = query + " where id in (?" + strings.Repeat(", ?", len(ids)-1) + ")"
+	}
+	rows, err := prepareAndExecuteSelectQuery(dao.DB, query, apiCommons.ToVarargInterface(ids)...)
 	if err != nil {
 		return nil, err
 	}

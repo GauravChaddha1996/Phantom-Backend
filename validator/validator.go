@@ -12,18 +12,18 @@ var ErrParamNotPtr = errors.New("parameter must be a pointer")
 var ErrPtrNotStruct = errors.New("pointer must be of a struct")
 var tagName = "validate"
 
-func Validate(data interface{}) *error {
+func Validate(data interface{}) error {
 	// Check that data kind is a pointer
 	dataType := reflect.TypeOf(data)
 	if dataType.Kind() != reflect.Ptr {
-		return &ErrParamNotPtr
+		return ErrParamNotPtr
 	}
 	dataType = dataType.Elem()
 	dataValue := reflect.ValueOf(data).Elem()
 
 	// Check that data points to a struct
 	if dataValue.Kind() != reflect.Struct {
-		return &ErrPtrNotStruct
+		return ErrPtrNotStruct
 	}
 
 	// For each field we validate it and append the field errors to structErrArr
@@ -38,7 +38,7 @@ func Validate(data interface{}) *error {
 		}
 	}
 	combinedStructError := multierr.Combine(structErrArr...)
-	return &combinedStructError
+	return combinedStructError
 }
 
 func validateField(structFieldData StructFieldData) *error {

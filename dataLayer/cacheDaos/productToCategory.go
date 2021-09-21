@@ -13,10 +13,14 @@ type CategoryIdToProductIdRedisDao struct {
 	Pool *redis.Pool
 }
 
+func (dao CategoryIdToProductIdRedisDao) GetCacheName(id int64) string {
+	return CategoryIdToProductIdCacheName + ":" + strconv.FormatInt(id, 10)
+}
+
 func (dao CategoryIdToProductIdRedisDao) DeleteWholeCache(categoriesFromDb *[]dbModels.Category) error {
 	conn := dao.Pool.Get()
 	for _, category := range *categoriesFromDb {
-		_, delErr := conn.Do("DEL", CategoryIdToProductIdCacheName+":"+strconv.FormatInt(category.Id, 10))
+		_, delErr := conn.Do("DEL", dao.GetCacheName(category.Id))
 		if delErr != nil {
 			return delErr
 		}
@@ -28,7 +32,7 @@ func (dao CategoryIdToProductIdRedisDao) SetCategoryIdsToProductIdsMap(productAr
 	conn := dao.Pool.Get()
 	var err error
 	for _, product := range *productArr {
-		key := CategoryIdToProductIdCacheName + ":" + strconv.FormatInt(product.CategoryId, 10)
+		key := dao.GetCacheName(product.CategoryId)
 		_, categoryIdSetErr := conn.Do("SADD", key, product.Id)
 		if categoryIdSetErr != nil {
 			err = multierror.Append(err, categoryIdSetErr)
@@ -39,7 +43,7 @@ func (dao CategoryIdToProductIdRedisDao) SetCategoryIdsToProductIdsMap(productAr
 
 func (dao CategoryIdToProductIdRedisDao) ReadNProductsOfCategoryId(categoryId *int64, n int) (*[]int64, error) {
 	conn := dao.Pool.Get()
-	key := CategoryIdToProductIdCacheName + ":" + strconv.FormatInt(*categoryId, 10)
+	key := dao.GetCacheName(*categoryId)
 	productIdsArr, readCacheErr := redis.Int64s(conn.Do("SRANDMEMBER", key, n))
 	if readCacheErr != nil {
 		return nil, readCacheErr

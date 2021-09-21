@@ -13,11 +13,15 @@ type PropertyValueToProductRedisDao struct {
 	Pool *redis.Pool
 }
 
+func (dao PropertyValueToProductRedisDao) GetCacheName(propertyId int64) string {
+	return PropertyValueIdToProductIdCacheName + ":" + strconv.FormatInt(propertyId, 10)
+}
+
 func (dao PropertyValueToProductRedisDao) DeleteWholeCache(propertyValues *[]dbModels.PropertyValue) error {
 	conn := dao.Pool.Get()
 
 	for _, propertyValue := range *propertyValues {
-		_, delErr := conn.Do("DEL", PropertyValueIdToProductIdCacheName+":"+strconv.FormatInt(propertyValue.Id, 10))
+		_, delErr := conn.Do("DEL", dao.GetCacheName(propertyValue.Id))
 		if delErr != nil {
 			return delErr
 		}
@@ -29,7 +33,7 @@ func (dao PropertyValueToProductRedisDao) SetPropertyValuesToProductIds(dataArr 
 	conn := dao.Pool.Get()
 	var err error
 	for _, productToProperty := range *dataArr {
-		key := PropertyValueIdToProductIdCacheName + ":" + strconv.FormatInt(productToProperty.ValueId, 10)
+		key := dao.GetCacheName(productToProperty.ValueId)
 		_, setErr := conn.Do("SADD", key, productToProperty.ProductId)
 		if setErr != nil {
 			err = multierror.Append(err, setErr)
@@ -40,7 +44,7 @@ func (dao PropertyValueToProductRedisDao) SetPropertyValuesToProductIds(dataArr 
 
 func (dao PropertyValueToProductRedisDao) ReadProductIdsOfPropertyValue(valueId int64) (*[]int64, error) {
 	conn := dao.Pool.Get()
-	key := PropertyValueIdToProductIdCacheName + ":" + strconv.FormatInt(valueId, 10)
+	key := dao.GetCacheName(valueId)
 
 	productIdsArr, cacheReadErr := redis.Int64s(conn.Do("SMEMBERS", key))
 	if cacheReadErr != nil {

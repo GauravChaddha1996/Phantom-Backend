@@ -32,3 +32,11 @@ func AppendIgnoringNils(
 	}
 	return slice
 }
+
+func ToVarargInterface(arr []int64) []interface{} {
+	interfaceArr := make([]interface{}, len(arr))
+	for index, element := range arr {
+		interfaceArr[index] = element
+	}
+	return interfaceArr
+}

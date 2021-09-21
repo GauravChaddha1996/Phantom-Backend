@@ -6,6 +6,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gomodule/redigo/redis"
 	"log"
+	"phantom/apis/filter"
 	"phantom/apis/home"
 	"phantom/config"
 	"phantom/dataLayer"
@@ -52,6 +53,7 @@ func main() {
 
 	// Register routes in router
 	router.GET("/home", home.ApiHandler)
+	router.GET("/filter", filter.ApiHandler)
 
 	// Start router
 	err := router.Run()
