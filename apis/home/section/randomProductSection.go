@@ -24,8 +24,11 @@ func RandomProductFullSection(
 		apiCommons.LogApiError(logData)
 		return nil
 	}
-
-	snippet := getProductFullSnippet(*randomProductId, apiDbResult)
+	
+	product := apiDbResult.ProductsMap[*randomProductId]
+	category := apiDbResult.CategoriesMap[product.CategoryId]
+	brand := apiDbResult.BrandsMap[product.BrandId]
+	snippet := snippets.MakeProductFullSnippet(*product, *category, *brand)
 	productFullSnippets = append(productFullSnippets, snippet)
 
 	return &snippets.SnippetSectionData{

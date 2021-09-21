@@ -26,7 +26,7 @@ func CategoryRailSection(
 	}
 
 	for _, categoryId := range *allCategoryIds {
-		snippet := getCategoryRailSnippet(apiDbResult, categoryId)
+		snippet := snippets.MakeCategoryRailSnippet(*apiDbResult.CategoriesMap[categoryId])
 		categoryRailSnippets = append(categoryRailSnippets, snippet)
 	}
 	return &snippets.SnippetSectionData{

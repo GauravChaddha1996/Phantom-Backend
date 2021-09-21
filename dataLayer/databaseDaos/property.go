@@ -3,7 +3,9 @@ package databaseDaos
 import (
 	"database/sql"
 	"github.com/hashicorp/go-multierror"
+	"phantom/apis/apiCommons"
 	"phantom/dataLayer/dbModels"
+	"strings"
 )
 
 type PropertySqlDao struct {
@@ -35,10 +37,12 @@ func (dao PropertySqlDao) ReadPropertyName(id int64) (*string, error) {
 	return name, err
 }
 
-func (dao PropertySqlDao) ReadAllProperty() (*[]dbModels.Property, error) {
+func (dao PropertySqlDao) ReadProperties(ids []int64) (*[]dbModels.Property, error) {
 	query := "Select * from property"
-
-	rows, err := prepareAndExecuteSelectQuery(dao.DB, query)
+	if len(ids) != 0 {
+		query = query + " where id in (?" + strings.Repeat(", ?", len(ids)-1) + ")"
+	}
+	rows, err := prepareAndExecuteSelectQuery(dao.DB, query, apiCommons.ToVarargInterface(ids)...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,4 +60,8 @@ func (dao PropertySqlDao) ReadAllProperty() (*[]dbModels.Property, error) {
 		propertyArr = append(propertyArr, property)
 	}
 	return &propertyArr, allRowScanErrs
+}
+
+func (dao PropertySqlDao) ReadAllProperty() (*[]dbModels.Property, error) {
+	return dao.ReadProperties([]int64{})
 }

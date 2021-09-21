@@ -60,7 +60,10 @@ func categoryToProductRailSection(
 	}
 	productIdMap.PutAllInt64s(productsOfCategoryId)
 	for _, productId := range *productsOfCategoryId {
-		snippet := getProductRailSnippet(productId, apiDbResult)
+		product := apiDbResult.ProductsMap[productId]
+		category := apiDbResult.CategoriesMap[product.CategoryId]
+		brand := apiDbResult.BrandsMap[product.BrandId]
+		snippet := snippets.MakeProductRailSnippet(*product, *category, *brand)
 		productsOfCategorySnippets = append(productsOfCategorySnippets, snippet)
 	}
 	return &snippets.SnippetSectionData{

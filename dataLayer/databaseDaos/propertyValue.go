@@ -65,3 +65,26 @@ func (dao PropertyValueSqlDao) ReadAllPropertyValues() (*[]dbModels.PropertyValu
 
 	return &propertyValueArr, allRowScanErrs
 }
+
+func (dao PropertyValueSqlDao) ReadAllPropertyValuesOfProperty(propertyId int64) (*[]dbModels.PropertyValue, error) {
+	var propertyValueArr []dbModels.PropertyValue
+	query := "Select * from property_value where property_id = ?"
+
+	rows, err := prepareAndExecuteSelectQuery(dao.DB, query, propertyId)
+	if err != nil {
+		return nil, err
+	}
+
+	var allRowScanErrs error
+	for rows.Next() {
+		var propertyValue dbModels.PropertyValue
+		rowScanErr := rows.Scan(&propertyValue.Id, &propertyValue.PropertyId, &propertyValue.Name)
+		if rowScanErr != nil {
+			allRowScanErrs = multierror.Append(allRowScanErrs, rowScanErr)
+			continue
+		}
+		propertyValueArr = append(propertyValueArr, propertyValue)
+	}
+
+	return &propertyValueArr, allRowScanErrs
+}

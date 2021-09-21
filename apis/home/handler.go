@@ -51,5 +51,5 @@ func ApiHandler(ctx *gin.Context) {
 		Message:  "",
 		Snippets: snippetSectionDataList,
 	}
-	ctx.JSON(200, homeApiResponse)
+	ctx.JSON(http.StatusOK, homeApiResponse)
 }

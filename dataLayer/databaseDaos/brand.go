@@ -3,7 +3,9 @@ package databaseDaos
 import (
 	"database/sql"
 	"github.com/hashicorp/go-multierror"
+	"phantom/apis/apiCommons"
 	"phantom/dataLayer/dbModels"
+	"strings"
 )
 
 type BrandSqlDao struct {
@@ -27,11 +29,13 @@ func (dao BrandSqlDao) ReadBrandName(id int64) (*string, error) {
 	return &brand.Name, nil
 }
 
-func (dao BrandSqlDao) ReadAllBrands() (*[]dbModels.Brand, error) {
+func (dao BrandSqlDao) ReadBrands(ids []int64) (*[]dbModels.Brand, error) {
 	var brands []dbModels.Brand
 	query := "Select * from brand"
-
-	rows, err := prepareAndExecuteSelectQuery(dao.DB, query)
+	if len(ids) != 0 {
+		query = query + " where id in (?" + strings.Repeat(", ?", len(ids)-1) + ")"
+	}
+	rows, err := prepareAndExecuteSelectQuery(dao.DB, query, apiCommons.ToVarargInterface(ids)...)
 	if err != nil {
 		return nil, err
 	}
@@ -48,6 +52,10 @@ func (dao BrandSqlDao) ReadAllBrands() (*[]dbModels.Brand, error) {
 	}
 
 	return &brands, allRowScanErrs
+}
+
+func (dao BrandSqlDao) ReadAllBrands() (*[]dbModels.Brand, error) {
+	return dao.ReadBrands([]int64{})
 }
 
 func (dao BrandSqlDao) ReadBrandComplete(id int64) (*dbModels.Brand, error) {

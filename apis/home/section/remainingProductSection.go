@@ -16,7 +16,9 @@ func RemainingProductsSection(
 
 	var productDualSnippets []snippets.ProductDualSnippet
 	for _, productId := range *remainingProductIds {
-		snippet := getProductDualSnippet(productId, apiDbResult)
+		product := apiDbResult.ProductsMap[productId]
+		brand := apiDbResult.BrandsMap[product.BrandId]
+		snippet := snippets.MakeProductDualSnippet(*product, *brand)
 		productDualSnippets = append(productDualSnippets, snippet)
 	}
 
