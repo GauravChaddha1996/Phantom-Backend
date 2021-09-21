@@ -1,11 +1,17 @@
 package apiCommons
 
 import (
+	"encoding/json"
+	"log"
 	"phantom/dataLayer/uiModels/snippets"
 )
 
 func LogApiError(data ApiErrorLogData) {
-
+	marshaledApiErrorLogData, err := json.Marshal(data)
+	if err != nil {
+		return
+	}
+	log.Println(string(marshaledApiErrorLogData))
 }
 
 func ToBaseSnippets(arr ...interface{}) *[]snippets.BaseSnippet {
