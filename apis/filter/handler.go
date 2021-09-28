@@ -10,6 +10,7 @@ import (
 	"phantom/dataLayer/cacheDaos"
 	"phantom/dataLayer/uiModels/snippets"
 	"phantom/ginRouter"
+	"sort"
 )
 
 const Filter_Api_Request_Model_Read_Err = "Err code: 1"
@@ -50,7 +51,7 @@ func ApiHandler(ctx *gin.Context) {
 	}
 
 	// Sort on api request model basis
-	//sortProducts(apiDbResult, apiRequest)
+	sortProducts(apiDbResult, apiRequest)
 
 	// Make api response
 	response := makeFilterApiResponse(apiRequest, apiDbResult)
@@ -87,30 +88,15 @@ func findPropertyIdsOfCategoryId(
 	return propertyIds, nil
 }
 
-//func sortProducts(apiDbResult *models.ApiDbResult, apiRequest *models.ApiRequest) {
-//	sort.SliceStable(*apiDbResult, func(one, two int) bool {
-//		productOne := (*apiDbResult)[one]
-//		productTwo := (*apiDbResult)[two]
-//
-//		isProductOneBeforeProductTwo := true
-//
-//		for _, sortMethod := range models.AllSortMethods {
-//			switch apiRequest.SortId {
-//			case models.Sort_Newly_Added:
-//				isProductOneBeforeProductTwo = productOne.CreatedAt.After(*productTwo.CreatedAt)
-//			case models.Sort_Price_Low_To_High:
-//				isProductOneBeforeProductTwo = productOne.Cost < productTwo.Cost
-//			case models.Sort_Price_High_To_Low:
-//				isProductOneBeforeProductTwo = productOne.Cost > productTwo.Cost
-//			case models.Sort_Brand_Wise:
-//				isProductOneBeforeProductTwo = false
-//			case models.Sort_A_Z:
-//				isProductOneBeforeProductTwo = strings.Compare(productOne.Name, productTwo.Name) < 0
-//			}
-//		}
-//		return isProductOneBeforeProductTwo
-//	})
-//}
+func sortProducts(apiDbResult *models.ApiDbResult, apiRequest *models.ApiRequest) {
+	productList := apiDbResult.ProductsList
+	sortMethod := models.FindSortMethod(apiRequest.SortId)
+	sort.SliceStable(productList, func(one, two int) bool {
+		productOne := (productList)[one]
+		productTwo := (productList)[two]
+		return sortMethod.Compare(productOne, productTwo)
+	})
+}
 
 func makeFilterApiResponse(apiRequest *models.ApiRequest, apiDbResult *models.ApiDbResult) models.FilterApiResponse {
 	snippetSectionData := section.GetFilteredProductSnippetSection(apiDbResult)
