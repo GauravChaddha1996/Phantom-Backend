@@ -3,8 +3,8 @@ package cacheDaos
 import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/hashicorp/go-multierror"
+	"github.com/spf13/cast"
 	"phantom/dataLayer/dbModels"
-	"strconv"
 )
 
 const ProductIdToPropertyValueIdCacheName = "product_id_to_property_value_id_cache"
@@ -17,7 +17,7 @@ func (dao ProductToPropertyValueRedisDao) DeleteWholeCache(products *[]dbModels.
 	conn := dao.Pool.Get()
 
 	for _, product := range *products {
-		_, delErr := conn.Do("DEL", ProductIdToPropertyValueIdCacheName+":"+strconv.FormatInt(product.Id, 10))
+		_, delErr := conn.Do("DEL", ProductIdToPropertyValueIdCacheName+":"+cast.ToString(product.Id))
 		if delErr != nil {
 			return delErr
 		}
@@ -29,7 +29,7 @@ func (dao ProductToPropertyValueRedisDao) SetProductIdsToPropertyValues(dataArr 
 	conn := dao.Pool.Get()
 	var err error
 	for _, productToProperty := range *dataArr {
-		key := ProductIdToPropertyValueIdCacheName + ":" + strconv.FormatInt(productToProperty.ProductId, 10)
+		key := ProductIdToPropertyValueIdCacheName + ":" + cast.ToString(productToProperty.ProductId)
 		_, setErr := conn.Do("SADD", key, productToProperty.ValueId)
 		if setErr != nil {
 			err = multierror.Append(err, setErr)
@@ -40,7 +40,7 @@ func (dao ProductToPropertyValueRedisDao) SetProductIdsToPropertyValues(dataArr 
 
 func (dao ProductToPropertyValueRedisDao) ReadPropertyValueIdsOfProduct(productId int64) (*[]int64, error) {
 	conn := dao.Pool.Get()
-	key := ProductIdToPropertyValueIdCacheName + ":" + strconv.FormatInt(productId, 10)
+	key := ProductIdToPropertyValueIdCacheName + ":" + cast.ToString(productId)
 
 	propertyValueIdsArr, cacheReadErr := redis.Int64s(conn.Do("SMEMBERS", key))
 	if cacheReadErr != nil {

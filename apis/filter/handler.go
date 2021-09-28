@@ -14,9 +14,9 @@ import (
 	"sort"
 )
 
-const Filter_Api_Filtering_Err = "Err code: 1"
-const Filter_Api_Db_Read_Err = "Err code: 2"
-const Filter_Api_Property_For_Category_Err = "Err code: 3"
+const apiFilteringErr = "Err code: 1"
+const apiDbReadErr = "Err code: 2"
+const apiPropertyForCategoryErr = "Err code: 3"
 
 func ApiHandler(ctx *gin.Context) {
 	// Initialization or find dependencies
@@ -32,21 +32,21 @@ func ApiHandler(ctx *gin.Context) {
 	// Find filtered product ids
 	productIds, filteringErr := findFilteredProductIds(ctx, redisPool, apiRequest)
 	if filteringErr != nil {
-		ctx.JSON(http.StatusInternalServerError, Filter_Api_Filtering_Err)
+		ctx.JSON(http.StatusInternalServerError, apiFilteringErr)
 		return
 	}
 
 	// Find property ids of category id
 	propertyIds, propertyForCategoryErr := findPropertyIdsOfCategoryId(ctx, redisPool, apiRequest.CategoryId)
 	if propertyForCategoryErr != nil {
-		ctx.JSON(http.StatusInternalServerError, Filter_Api_Property_For_Category_Err)
+		ctx.JSON(http.StatusInternalServerError, apiPropertyForCategoryErr)
 		return
 	}
 
 	// Read results needed from db
 	apiDbResult, dbReadErr := readFromDb(ctx, productIds, propertyIds)
 	if dbReadErr != nil {
-		ctx.JSON(http.StatusInternalServerError, Filter_Api_Db_Read_Err)
+		ctx.JSON(http.StatusInternalServerError, apiDbReadErr)
 		return
 	}
 

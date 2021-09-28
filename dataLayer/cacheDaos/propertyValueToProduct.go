@@ -3,8 +3,8 @@ package cacheDaos
 import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/hashicorp/go-multierror"
+	"github.com/spf13/cast"
 	"phantom/dataLayer/dbModels"
-	"strconv"
 )
 
 const PropertyValueIdToProductIdCacheName = "property_value_id_to_product_id_cache"
@@ -14,7 +14,7 @@ type PropertyValueToProductRedisDao struct {
 }
 
 func (dao PropertyValueToProductRedisDao) GetCacheName(propertyId int64) string {
-	return PropertyValueIdToProductIdCacheName + ":" + strconv.FormatInt(propertyId, 10)
+	return PropertyValueIdToProductIdCacheName + ":" + cast.ToString(propertyId)
 }
 
 func (dao PropertyValueToProductRedisDao) DeleteWholeCache(propertyValues *[]dbModels.PropertyValue) error {

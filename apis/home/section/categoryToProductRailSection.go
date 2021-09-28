@@ -2,13 +2,13 @@ package section
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	"phantom/apis/apiCommons"
 	"phantom/apis/home/models"
 	"phantom/dataLayer/cacheDaos"
 	"phantom/dataLayer/dbModels"
 	"phantom/dataLayer/uiModels/atoms"
 	"phantom/dataLayer/uiModels/snippets"
-	"strconv"
 )
 
 const categoryToProductRailSectionCount = 1
@@ -54,7 +54,7 @@ func categoryToProductRailSection(
 	productsOfCategoryId, err := categoryToProductCacheDao.ReadNProductsOfCategoryId(&category.Id, categoryToProductRailSectionCount)
 	if err != nil {
 		logData := apiCommons.NewApiErrorLogData(ctx, "Error reading first N Products of category from cache", err)
-		logData.Data["category_id"] = strconv.FormatInt(category.Id, 10)
+		logData.Data["category_id"] = cast.ToString(category.Id)
 		apiCommons.LogApiError(logData)
 		return nil
 	}

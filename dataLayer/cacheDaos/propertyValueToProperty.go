@@ -3,8 +3,8 @@ package cacheDaos
 import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/hashicorp/go-multierror"
+	"github.com/spf13/cast"
 	"phantom/dataLayer/dbModels"
-	"strconv"
 )
 
 const PropertyValueIdToPropertyIdCacheName = "property_value_id_to_property_id_cache"
@@ -16,7 +16,7 @@ type PropertyValueIdToPropertyIdRedisDao struct {
 func (dao PropertyValueIdToPropertyIdRedisDao) DeleteWholeCache(propertyValueArr *[]dbModels.PropertyValue) error {
 	conn := dao.Pool.Get()
 	for _, propertyValue := range *propertyValueArr {
-		key := PropertyValueIdToPropertyIdCacheName + ":" + strconv.FormatInt(propertyValue.Id, 10)
+		key := PropertyValueIdToPropertyIdCacheName + ":" + cast.ToString(propertyValue.Id)
 		_, delErr := conn.Do("DEL", key)
 		if delErr != nil {
 			return delErr
@@ -29,7 +29,7 @@ func (dao PropertyValueIdToPropertyIdRedisDao) SetPropertyValueIdToPropertyIdCac
 	conn := dao.Pool.Get()
 	var err error
 	for _, propertyValue := range *dataArr {
-		key := PropertyValueIdToPropertyIdCacheName + ":" + strconv.FormatInt(propertyValue.Id, 10)
+		key := PropertyValueIdToPropertyIdCacheName + ":" + cast.ToString(propertyValue.Id)
 		_, setErr := conn.Do("SET", key, propertyValue.PropertyId)
 		if setErr != nil {
 			err = multierror.Append(err, setErr)
@@ -40,7 +40,7 @@ func (dao PropertyValueIdToPropertyIdRedisDao) SetPropertyValueIdToPropertyIdCac
 
 func (dao PropertyValueIdToPropertyIdRedisDao) ReadPropertyIdForPropertyValueId(propertyValueId int64) (*int64, error) {
 	conn := dao.Pool.Get()
-	key := PropertyValueIdToPropertyIdCacheName + ":" + strconv.FormatInt(propertyValueId, 10)
+	key := PropertyValueIdToPropertyIdCacheName + ":" + cast.ToString(propertyValueId)
 	propertyId, readErr := redis.Int64(conn.Do("GET", key))
 	if readErr != nil {
 		return nil, readErr
@@ -50,7 +50,7 @@ func (dao PropertyValueIdToPropertyIdRedisDao) ReadPropertyIdForPropertyValueId(
 
 func (dao PropertyValueIdToPropertyIdRedisDao) IsPropertyIdValid(propertyValueId int64) (bool, error) {
 	conn := dao.Pool.Get()
-	key := PropertyValueIdToPropertyIdCacheName + ":" + strconv.FormatInt(propertyValueId, 10)
+	key := PropertyValueIdToPropertyIdCacheName + ":" + cast.ToString(propertyValueId)
 	exists, readErr := redis.Int(conn.Do("EXISTS", key))
 	if readErr != nil {
 		return false, readErr

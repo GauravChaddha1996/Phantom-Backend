@@ -1,9 +1,9 @@
 package snippets
 
 import (
+	"github.com/spf13/cast"
 	"phantom/dataLayer/dbModels"
 	"phantom/dataLayer/uiModels/atoms"
-	"strconv"
 )
 
 type ProductDualSnippet struct {
@@ -24,7 +24,7 @@ func MakeProductDualSnippet(
 		Name:      &atoms.TextData{Text: product.Name},
 		ShortDesc: &atoms.TextData{Text: product.ShortDescription},
 		Brand:     &atoms.TextData{Text: brand.Name},
-		Cost:      &atoms.TextData{Text: strconv.FormatInt(product.Cost, 10)},
+		Cost:      &atoms.TextData{Text: cast.ToString(product.Cost)},
 		Image:     &atoms.ImageData{Url: product.CardImage},
 	}
 	return snippet

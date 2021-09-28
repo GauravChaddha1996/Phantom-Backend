@@ -3,8 +3,8 @@ package cacheDaos
 import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/hashicorp/go-multierror"
+	"github.com/spf13/cast"
 	"phantom/dataLayer/dbModels"
-	"strconv"
 )
 
 const CategoryIdToProductIdCacheName = "category_id_to_product_id_cache"
@@ -14,7 +14,7 @@ type CategoryIdToProductIdRedisDao struct {
 }
 
 func (dao CategoryIdToProductIdRedisDao) GetCacheName(id int64) string {
-	return CategoryIdToProductIdCacheName + ":" + strconv.FormatInt(id, 10)
+	return CategoryIdToProductIdCacheName + ":" + cast.ToString(id)
 }
 
 func (dao CategoryIdToProductIdRedisDao) DeleteWholeCache(categoriesFromDb *[]dbModels.Category) error {

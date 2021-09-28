@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-multierror"
+	"github.com/spf13/cast"
 	"phantom/apis/apiCommons"
 	"phantom/apis/filter/models"
 	"phantom/dataLayer/databaseDaos"
 	"phantom/dataLayer/dbModels"
 	"phantom/ginRouter"
-	"strconv"
 	"sync"
 )
 
@@ -137,7 +137,7 @@ func makePropertyToPropertyValueMap(
 		propertyValuesOfProperty, propertyValueReadErr := propertyValueDbDao.ReadAllPropertyValuesOfProperty(property.Id)
 		if propertyValueReadErr != nil {
 			logData := apiCommons.NewApiErrorLogData(ctx, "Error reading property values of property", propertyValueReadErr)
-			logData.Data["property_id"] = strconv.FormatInt(property.Id, 10)
+			logData.Data["property_id"] = cast.ToString(property.Id)
 			apiCommons.LogApiError(logData)
 			errChan <- propertiesReadErr
 		} else {
