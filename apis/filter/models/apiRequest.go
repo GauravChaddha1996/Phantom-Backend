@@ -8,9 +8,10 @@ import (
 )
 
 type ApiRequest struct {
-	CategoryId       int64   `form:"category_id"`
-	PropertyValueIds []int64 `form:"property_value_ids"`
-	SortId           int64   `form:"sort_id"`
+	CategoryId          int64   `form:"category_id"`
+	PropertyValueIds    []int64 `form:"property_value_ids"`
+	SortId              int64   `form:"sort_id"`
+	PropertyValueIdsMap map[int64]bool
 }
 
 func ReadApiRequestModel(ctx *gin.Context) (*ApiRequest, error) {
@@ -31,14 +32,10 @@ func ReadApiRequestModel(ctx *gin.Context) (*ApiRequest, error) {
 		return nil, validationErr
 	}
 
-	return &apiRequest, nil
-}
-
-func (request ApiRequest) ContainsPropertyValueId(id int64) bool {
-	for _, propertyValueId := range request.PropertyValueIds {
-		if propertyValueId == id {
-			return true
-		}
+	// Fill some useful map for later
+	apiRequest.PropertyValueIdsMap = make(map[int64]bool, 0)
+	for _, propertyValueId := range apiRequest.PropertyValueIds {
+		apiRequest.PropertyValueIdsMap[propertyValueId] = true
 	}
-	return false
+	return &apiRequest, nil
 }

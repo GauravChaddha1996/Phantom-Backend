@@ -56,7 +56,7 @@ func makePropertyValueUiData(
 	propertyValueUiData := FilterSheetPropertyValueUiData{
 		Id:       propertyValue.Id,
 		Name:     atoms.TextData{Text: propertyValue.Name},
-		Selected: apiRequest.ContainsPropertyValueId(propertyValue.Id),
+		Selected: apiRequest.PropertyValueIdsMap[propertyValue.Id],
 	}
 	return propertyValueUiData
 }
