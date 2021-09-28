@@ -8,7 +8,10 @@ type FilterProductsDao struct {
 	Pool *redis.Pool
 }
 
-func (dao FilterProductsDao) FindProductsForFilter(categoryId int64, propertyValueIds []int64) (*[]int64, error) {
+func (dao FilterProductsDao) FindProductsForFilter(
+	categoryId int64,
+	propertyValueIdsMap map[int64]bool,
+) (*[]int64, error) {
 	conn := dao.Pool.Get()
 
 	// Find cache name for category id
@@ -18,7 +21,7 @@ func (dao FilterProductsDao) FindProductsForFilter(categoryId int64, propertyVal
 	// Find cache names for property value ids
 	var propertyValueCacheNameArr []string
 	propertyValueToProductRedisDao := PropertyValueToProductRedisDao{dao.Pool}
-	for _, propertyValueId := range propertyValueIds {
+	for propertyValueId := range propertyValueIdsMap {
 		propertyValueCacheName := propertyValueToProductRedisDao.GetCacheName(propertyValueId)
 		propertyValueCacheNameArr = append(propertyValueCacheNameArr, propertyValueCacheName)
 	}

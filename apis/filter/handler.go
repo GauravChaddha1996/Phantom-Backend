@@ -64,7 +64,7 @@ func findFilteredProductIds(
 	apiRequest *models.ApiRequest,
 ) (*[]int64, error) {
 	filterProductsDao := cacheDaos.FilterProductsDao{Pool: redisPool}
-	productIds, err := filterProductsDao.FindProductsForFilter(apiRequest.CategoryId, apiRequest.PropertyValueIds)
+	productIds, err := filterProductsDao.FindProductsForFilter(apiRequest.CategoryId, apiRequest.PropertyValueIdsMap)
 	if err != nil {
 		logData := apiCommons.NewApiErrorLogData(ctx, "something went wrong while filtering products", err)
 		apiCommons.LogApiError(logData)
