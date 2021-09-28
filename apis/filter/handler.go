@@ -7,16 +7,16 @@ import (
 	"phantom/apis/apiCommons"
 	"phantom/apis/filter/models"
 	"phantom/apis/filter/section"
+	"phantom/dataLayer"
 	"phantom/dataLayer/cacheDaos"
 	"phantom/dataLayer/uiModels/snippets"
 	"phantom/ginRouter"
 	"sort"
 )
 
-const Filter_Api_Request_Model_Read_Err = "Err code: 1"
-const Filter_Api_Filtering_Err = "Err code: 2"
-const Filter_Api_Db_Read_Err = "Err code: 3"
-const Filter_Api_Property_For_Category_Err = "Err code: 4"
+const Filter_Api_Filtering_Err = "Err code: 1"
+const Filter_Api_Db_Read_Err = "Err code: 2"
+const Filter_Api_Property_For_Category_Err = "Err code: 3"
 
 func ApiHandler(ctx *gin.Context) {
 	// Initialization or find dependencies
@@ -25,7 +25,7 @@ func ApiHandler(ctx *gin.Context) {
 	// Read api request model
 	apiRequest, apiRequestReadErr := models.ReadApiRequestModel(ctx)
 	if apiRequestReadErr != nil {
-		ctx.JSON(http.StatusInternalServerError, Filter_Api_Request_Model_Read_Err)
+		ctx.JSON(http.StatusInternalServerError, apiRequestReadErr.Error())
 		return
 	}
 
@@ -90,7 +90,7 @@ func findPropertyIdsOfCategoryId(
 
 func sortProducts(apiDbResult *models.ApiDbResult, apiRequest *models.ApiRequest) {
 	productList := apiDbResult.ProductsList
-	sortMethod := models.FindSortMethod(apiRequest.SortId)
+	sortMethod := dataLayer.FindSortMethod(apiRequest.SortId)
 	sort.SliceStable(productList, func(one, two int) bool {
 		productOne := (productList)[one]
 		productTwo := (productList)[two]

@@ -41,3 +41,12 @@ func (dao AllCategoryIdsRedisDao) ReadAllCategoryIds() (*[]int64, error) {
 	}
 	return &categoryIds, nil
 }
+
+func (dao AllCategoryIdsRedisDao) IsMember(categoryId int64) (bool, error) {
+	conn := dao.Pool.Get()
+	isMember, categoryIdsReadErr := redis.Int(conn.Do("SISMEMBER", AllCategoryIdCacheName, categoryId))
+	if categoryIdsReadErr != nil {
+		return false, categoryIdsReadErr
+	}
+	return isMember == 1, nil
+}

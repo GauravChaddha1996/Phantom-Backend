@@ -11,6 +11,7 @@ import (
 	"phantom/config"
 	"phantom/dataLayer"
 	"phantom/ginRouter"
+	"phantom/validator"
 	"time"
 )
 
@@ -43,6 +44,9 @@ func main() {
 		log.Fatal(cachePopulateErr)
 		return
 	}
+
+	// Initialize the validator
+	validator.Init(redisCachePool)
 
 	// Initialize ginRouter
 	router, routerInitErr := ginRouter.Initialize(redisCachePool, sqlDb)

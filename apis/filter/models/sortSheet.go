@@ -1,6 +1,7 @@
 package models
 
 import (
+	"phantom/dataLayer"
 	"phantom/dataLayer/uiModels/atoms"
 )
 
@@ -16,7 +17,7 @@ type SortMethodUiData struct {
 
 func MakeSortSheetUiData(selectedSortMethodId int64) SortSheetUiData {
 	var sortSheetMethods []SortMethodUiData
-	for _, sortMethod := range AllSortMethods {
+	for _, sortMethod := range dataLayer.AllSortMethods {
 		sortMethodUiData := SortMethodUiData{
 			Id:       sortMethod.Id,
 			Name:     atoms.TextData{Text: sortMethod.Title},

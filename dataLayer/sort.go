@@ -1,4 +1,4 @@
-package models
+package dataLayer
 
 import (
 	"phantom/dataLayer/dbModels"

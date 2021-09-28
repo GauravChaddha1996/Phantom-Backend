@@ -9,9 +9,10 @@ import (
 )
 
 type ApiRequest struct {
-	CategoryId          int64  `form:"category_id"`
-	PropertyValueIds    string `form:"property_value_ids"`
-	SortId              int64  `form:"sort_id"`
+	CategoryId          int64   `form:"category_id" validate:"required,category_id"`
+	SortId              int64   `form:"sort_id" validate:"sort_id"`
+	PropertyValueIdsStr string  `form:"property_value_ids"`
+	PropertyValueIds    []int64 `validate:"property_ids"`
 	PropertyValueIdsMap map[int64]bool
 }
 
@@ -21,10 +22,10 @@ func ReadApiRequestModel(ctx *gin.Context) (*ApiRequest, error) {
 	// Bind the query to our request model
 	queryParamsReadErr := ctx.BindQuery(&apiRequest)
 	// Some sad manual binding
-	var propertyValueIdArr []int64
+	apiRequest.PropertyValueIds = make([]int64, 0)
 	var propertyValueIdUnmarshalErr error
-	if len(apiRequest.PropertyValueIds) > 0 {
-		propertyValueIdUnmarshalErr = json.Unmarshal([]byte(apiRequest.PropertyValueIds), &propertyValueIdArr)
+	if len(apiRequest.PropertyValueIdsStr) > 0 {
+		propertyValueIdUnmarshalErr = json.Unmarshal([]byte(apiRequest.PropertyValueIdsStr), &apiRequest.PropertyValueIds)
 	}
 
 	// Binding error handling
@@ -43,7 +44,7 @@ func ReadApiRequestModel(ctx *gin.Context) (*ApiRequest, error) {
 
 	// Fill some useful map for later
 	apiRequest.PropertyValueIdsMap = make(map[int64]bool, 0)
-	for _, propertyValueId := range propertyValueIdArr {
+	for _, propertyValueId := range apiRequest.PropertyValueIds {
 		apiRequest.PropertyValueIdsMap[propertyValueId] = true
 	}
 

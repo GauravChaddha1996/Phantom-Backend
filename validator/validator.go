@@ -3,7 +3,11 @@ package validator
 import (
 	"errors"
 	"fmt"
+	"github.com/gomodule/redigo/redis"
+	"github.com/spf13/cast"
 	"go.uber.org/multierr"
+	sortModels "phantom/dataLayer"
+	"phantom/dataLayer/cacheDaos"
 	"reflect"
 	"strings"
 )
@@ -11,6 +15,15 @@ import (
 var ErrParamNotPtr = errors.New("parameter must be a pointer")
 var ErrPtrNotStruct = errors.New("pointer must be of a struct")
 var tagName = "validate"
+
+// Daos used in validation
+var categoryCacheDao *cacheDaos.AllCategoryIdsRedisDao
+var propertyValueIdCacheDao *cacheDaos.PropertyValueIdToPropertyIdRedisDao
+
+func Init(pool *redis.Pool) {
+	categoryCacheDao = &cacheDaos.AllCategoryIdsRedisDao{Pool: pool}
+	propertyValueIdCacheDao = &cacheDaos.PropertyValueIdToPropertyIdRedisDao{Pool: pool}
+}
 
 func Validate(data interface{}) error {
 	// Check that data kind is a pointer
@@ -66,6 +79,12 @@ func validateCondition(fieldData StructFieldData, condition string) *error {
 	switch {
 	case condition == "required":
 		conditionErr = required(fieldData)
+	case condition == "category_id":
+		conditionErr = isValidCategoryId(fieldData)
+	case condition == "sort_id":
+		conditionErr = isValidSortId(fieldData)
+	case condition == "property_ids":
+		conditionErr = isValidPropertyIds(fieldData)
 	}
 	return conditionErr
 }
@@ -78,6 +97,71 @@ func required(fieldData StructFieldData) *error {
 	if fieldData.Value.IsZero() {
 		err := errors.New(fmt.Sprintf("%s must be present", fieldData.Name))
 		return &err
+	}
+	return nil
+}
+
+func isValidCategoryId(fieldData StructFieldData) *error {
+	categoryId, castErr := cast.ToInt64E(fieldData.Value.Interface())
+	if castErr != nil {
+		fieldTypeErr := errors.New(fmt.Sprintf("%s must be an integer", fieldData.Name))
+		return &fieldTypeErr
+	}
+	isMember, cacheErr := categoryCacheDao.IsMember(categoryId)
+	if cacheErr != nil {
+		err := errors.New(fmt.Sprintf("%s isn't valid. Something went wrong", fieldData.Name))
+		return &err
+	}
+
+	if !isMember {
+		err := errors.New(fmt.Sprintf("%s must be a valid category id", fieldData.Name))
+		return &err
+	}
+	return nil
+}
+
+func isValidSortId(fieldData StructFieldData) *error {
+	sortId, castErr := cast.ToInt64E(fieldData.Value.Interface())
+	if castErr != nil {
+		fieldTypeErr := errors.New(fmt.Sprintf("%s must be an integer", fieldData.Name))
+		return &fieldTypeErr
+	}
+	isSortIdValid := false
+	for _, sortMethod := range sortModels.AllSortMethods {
+		if sortMethod.Id == sortId {
+			isSortIdValid = true
+		}
+	}
+
+	if !isSortIdValid {
+		err := errors.New(fmt.Sprintf("%s must be a valid sort id", fieldData.Name))
+		return &err
+	}
+	return nil
+}
+
+func isValidPropertyIds(fieldData StructFieldData) *error {
+	propertyIdsArr, ok := fieldData.Value.Interface().([]int64)
+	if !ok {
+		fieldTypeErr := errors.New(fmt.Sprintf("%s must be an integer array", fieldData.Name))
+		return &fieldTypeErr
+	}
+	propertyIdErrArr := make([]error, 0)
+	for _, propertyId := range propertyIdsArr {
+		valid, cacheErr := propertyValueIdCacheDao.IsPropertyIdValid(propertyId)
+		if cacheErr != nil {
+			err := errors.New(fmt.Sprintf("%s isn't valid. Something went wrong", fieldData.Name))
+			return &err
+		}
+		if !valid {
+			notValidErr := errors.New(fmt.Sprintf("%d must be a valid property id", propertyId))
+			propertyIdErrArr = append(propertyIdErrArr, notValidErr)
+		}
+	}
+
+	combinedErr := multierr.Combine(propertyIdErrArr...)
+	if combinedErr != nil {
+		return &combinedErr
 	}
 	return nil
 }

@@ -47,3 +47,13 @@ func (dao PropertyValueIdToPropertyIdRedisDao) ReadPropertyIdForPropertyValueId(
 	}
 	return &propertyId, nil
 }
+
+func (dao PropertyValueIdToPropertyIdRedisDao) IsPropertyIdValid(propertyValueId int64) (bool, error) {
+	conn := dao.Pool.Get()
+	key := PropertyValueIdToPropertyIdCacheName + ":" + strconv.FormatInt(propertyValueId, 10)
+	exists, readErr := redis.Int(conn.Do("EXISTS", key))
+	if readErr != nil {
+		return false, readErr
+	}
+	return exists == 1, nil
+}
