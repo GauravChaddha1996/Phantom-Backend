@@ -12,6 +12,7 @@ import (
 )
 
 const categoryToProductRailSectionCount = 1
+const seeAll = "See all"
 
 func CategoryToProductRailSections(
 	ctx *gin.Context,
@@ -70,6 +71,14 @@ func categoryToProductRailSection(
 		Type: snippets.ProductRailSection,
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title: &atoms.TextData{Text: category.Name},
+			RightButton: &atoms.ButtonData{
+				Type: atoms.ButtonTypeText,
+				Text: atoms.TextData{Text: seeAll},
+				Click: atoms.ClickData{
+					Type: atoms.ClickTypeOpenCategory,
+					Data: atoms.CategoryClickData{CategoryId: category.Id},
+				},
+			},
 		},
 		Snippets: apiCommons.ToBaseSnippets(productsOfCategorySnippets),
 	}
