@@ -1,6 +1,7 @@
 package filter
 
 import (
+	"database/sql"
 	"github.com/gin-gonic/gin"
 	"github.com/gomodule/redigo/redis"
 	"net/http"
@@ -9,6 +10,8 @@ import (
 	"phantom/apis/filter/section"
 	"phantom/dataLayer"
 	"phantom/dataLayer/cacheDaos"
+	"phantom/dataLayer/databaseDaos"
+	"phantom/dataLayer/dbModels"
 	"phantom/dataLayer/uiModels/snippets"
 	"phantom/ginRouter"
 	"sort"
@@ -17,15 +20,25 @@ import (
 const apiFilteringErr = "Err code: 1"
 const apiDbReadErr = "Err code: 2"
 const apiPropertyForCategoryErr = "Err code: 3"
+const apiCategoryReadErr = "Err code: 4"
 
 func ApiHandler(ctx *gin.Context) {
 	// Initialization or find dependencies
 	redisPool := ctx.MustGet(ginRouter.REDIS_POOL).(*redis.Pool)
+	db := ctx.MustGet(ginRouter.SQL_DB).(*sql.DB)
+	categoryDao := databaseDaos.CategorySqlDao{DB: db}
 
 	// Read api request model
 	apiRequest, apiRequestReadErr := models.ReadApiRequestModel(ctx)
 	if apiRequestReadErr != nil {
 		ctx.JSON(http.StatusInternalServerError, apiRequestReadErr.Error())
+		return
+	}
+
+	// Find category data
+	category, categoryReadErr := categoryDao.ReadCategoryComplete(apiRequest.CategoryId)
+	if categoryReadErr != nil {
+		ctx.JSON(http.StatusInternalServerError, apiCategoryReadErr)
 		return
 	}
 
@@ -54,7 +67,7 @@ func ApiHandler(ctx *gin.Context) {
 	sortProducts(apiDbResult, apiRequest)
 
 	// Make api response
-	response := makeFilterApiResponse(apiRequest, apiDbResult)
+	response := makeFilterApiResponse(apiRequest, apiDbResult, category)
 	ctx.JSON(http.StatusOK, response)
 }
 
@@ -98,12 +111,15 @@ func sortProducts(apiDbResult *models.ApiDbResult, apiRequest *models.ApiRequest
 	})
 }
 
-func makeFilterApiResponse(apiRequest *models.ApiRequest, apiDbResult *models.ApiDbResult) models.FilterApiResponse {
+func makeFilterApiResponse(
+	apiRequest *models.ApiRequest, apiDbResult *models.ApiDbResult, category *dbModels.Category,
+) models.FilterApiResponse {
+	headerSection := section.MakeHeaderSection(category)
 	snippetSectionData := section.GetFilteredProductSnippetSection(apiDbResult)
 	return models.FilterApiResponse{
 		Status:            "success",
 		Message:           "",
-		Snippets:          []*snippets.SnippetSectionData{&snippetSectionData},
+		Snippets:          []*snippets.SnippetSectionData{headerSection, &snippetSectionData},
 		FilterSheetUiData: models.MakeFilterSheetUiData(apiRequest, apiDbResult.PropertyToPropertyValueMap),
 		SortSheetUiData:   models.MakeSortSheetUiData(apiRequest.SortId),
 	}
