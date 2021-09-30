@@ -8,6 +8,7 @@ import (
 	"log"
 	"phantom/apis/filter"
 	"phantom/apis/home"
+	"phantom/apis/product"
 	"phantom/config"
 	"phantom/dataLayer"
 	"phantom/ginRouter"
@@ -58,6 +59,7 @@ func main() {
 	// Register routes in router
 	router.GET("/home", home.ApiHandler)
 	router.GET("/filter", filter.ApiHandler)
+	router.GET("/product", product.ApiHandler)
 
 	// Start router
 	err := router.Run()

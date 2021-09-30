@@ -19,8 +19,8 @@ func (dao ProductImageSqlDao) AddProductImage(productImage dbModels.ProductImage
 	return &productImage, nil
 }
 
-func (dao ProductImageSqlDao) ReadProductImages(productId int64) ([]*dbModels.ProductImage, error) {
-	var images []*dbModels.ProductImage
+func (dao ProductImageSqlDao) ReadProductImages(productId int64) (*[]dbModels.ProductImage, error) {
+	var images []dbModels.ProductImage
 	query := "Select * from product_image where product_id = ?"
 
 	rows, err := prepareAndExecuteSelectQuery(dao.DB, query, productId)
@@ -37,7 +37,7 @@ func (dao ProductImageSqlDao) ReadProductImages(productId int64) ([]*dbModels.Pr
 			allRowScanErrs = multierror.Append(allRowScanErrs, rowScanErr)
 			continue
 		}
-		images = append(images, &image)
+		images = append(images, image)
 	}
-	return images, allRowScanErrs
+	return &images, allRowScanErrs
 }

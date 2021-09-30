@@ -1,5 +1,5 @@
 package atoms
 
 type ImageData struct {
-	Url string
+	Url string `json:"url,omitempty"`
 }

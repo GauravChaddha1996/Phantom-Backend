@@ -19,10 +19,12 @@ var tagName = "validate"
 // Daos used in validation
 var categoryCacheDao *cacheDaos.AllCategoryIdsRedisDao
 var propertyValueIdCacheDao *cacheDaos.PropertyValueIdToPropertyIdRedisDao
+var productCacheDao *cacheDaos.AllProductIdsRedisDao
 
 func Init(pool *redis.Pool) {
 	categoryCacheDao = &cacheDaos.AllCategoryIdsRedisDao{Pool: pool}
 	propertyValueIdCacheDao = &cacheDaos.PropertyValueIdToPropertyIdRedisDao{Pool: pool}
+	productCacheDao = &cacheDaos.AllProductIdsRedisDao{Pool: pool}
 }
 
 func Validate(data interface{}) error {
@@ -85,6 +87,8 @@ func validateCondition(fieldData StructFieldData, condition string) *error {
 		conditionErr = isValidSortId(fieldData)
 	case condition == "property_ids":
 		conditionErr = isValidPropertyIds(fieldData)
+	case condition == "product_id":
+		conditionErr = isValidProductId(fieldData)
 	}
 	return conditionErr
 }
@@ -163,5 +167,25 @@ func isValidPropertyIds(fieldData StructFieldData) *error {
 	if combinedErr != nil {
 		return &combinedErr
 	}
+	return nil
+}
+
+func isValidProductId(fieldData StructFieldData) *error {
+	productId, castErr := cast.ToInt64E(fieldData.Value.Interface())
+	if castErr != nil {
+		fieldTypeErr := errors.New(fmt.Sprintf("%s must be an integer", fieldData.Name))
+		return &fieldTypeErr
+	}
+	isMember, cacheErr := productCacheDao.IsValidProductId(productId)
+	if cacheErr != nil {
+		err := errors.New(fmt.Sprintf("%s isn't valid. Something went wrong", fieldData.Name))
+		return &err
+	}
+
+	if !isMember {
+		err := errors.New(fmt.Sprintf("%s must be a valid product id", fieldData.Name))
+		return &err
+	}
+
 	return nil
 }

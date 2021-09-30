@@ -64,7 +64,11 @@ func readFromDb(ctx *gin.Context, productIds *[]int64, propertyIds *[]int64) (*m
 }
 
 func readProductsFromDb(
-	ctx *gin.Context, db *sql.DB, productIds *[]int64, errChan chan error, wg *sync.WaitGroup,
+	ctx *gin.Context,
+	db *sql.DB,
+	productIds *[]int64,
+	errChan chan error,
+	wg *sync.WaitGroup,
 ) []dbModels.Product {
 	defer wg.Done()
 	productDbDao := databaseDaos.ProductSqlDao{DB: db}

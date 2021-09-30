@@ -21,20 +21,19 @@ func (dao PropertySqlDao) CreateProperty(property dbModels.Property) (*int64, er
 	return lastInsertId, nil
 }
 
-func (dao PropertySqlDao) ReadPropertyName(id int64) (*string, error) {
-	var name *string
-	query := "Select name from property where id = ? limit 1"
-
+func (dao PropertySqlDao) ReadPropertyComplete(id int64) (*dbModels.Property, error) {
+	var property dbModels.Property
+	query := "Select * from property where id = ? limit 1"
 	row, err := prepareAndExecuteSingleRowSelectQuery(dao.DB, query, id)
 	if err != nil {
 		return nil, err
 	}
 
-	err = row.Scan(&name)
+	err = row.Scan(&property.Id, &property.Name)
 	if err != nil {
 		return nil, err
 	}
-	return name, err
+	return &property, err
 }
 
 func (dao PropertySqlDao) ReadProperties(ids []int64) (*[]dbModels.Property, error) {

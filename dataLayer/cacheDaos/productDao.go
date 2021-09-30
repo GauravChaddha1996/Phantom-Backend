@@ -60,3 +60,12 @@ func (dao AllProductIdsRedisDao) ReadRandomProduct() (*int64, error) {
 	}
 	return &productId, nil
 }
+
+func (dao AllProductIdsRedisDao) IsValidProductId(productId int64) (bool, error) {
+	conn := dao.Pool.Get()
+	isMember, readErr := redis.String(conn.Do("ZSCORE", AllProductIdCacheName, productId))
+	if readErr != nil {
+		return false, readErr
+	}
+	return len(isMember) > 0, nil
+}

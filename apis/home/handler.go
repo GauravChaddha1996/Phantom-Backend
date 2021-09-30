@@ -46,6 +46,7 @@ func ApiHandler(ctx *gin.Context) {
 	snippetSectionDataList = apiCommons.AppendIgnoringNils(snippetSectionDataList, randomProduct2FullSection)
 	snippetSectionDataList = apiCommons.AppendIgnoringNils(snippetSectionDataList, remainingDualProductSection)
 
+	// Make api response
 	homeApiResponse := models.HomeApiResponse{
 		Status:   "success",
 		Message:  "",
