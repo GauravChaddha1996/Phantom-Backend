@@ -14,6 +14,7 @@ type ProductDualSnippetData struct {
 	Brand     *atoms.TextData  `json:"brand,omitempty"`
 	Cost      *atoms.TextData  `json:"cost,omitempty"`
 	Image     *atoms.ImageData `json:"image,omitempty"`
+	Click     interface{}      `json:"click,omitempty"`
 }
 
 func MakeProductDualSnippet(
@@ -28,6 +29,10 @@ func MakeProductDualSnippet(
 		Brand:     &atoms.TextData{Text: brand.Name},
 		Cost:      &atoms.TextData{Text: cast.ToString(product.Cost)},
 		Image:     &atoms.ImageData{Url: product.CardImage},
+		Click: atoms.ProductClickData{
+			Type:      atoms.ClickTypeOpenProduct,
+			ProductId: product.Id,
+		},
 	}
 	return snippet
 }

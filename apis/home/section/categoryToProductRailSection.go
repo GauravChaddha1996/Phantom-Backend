@@ -73,9 +73,9 @@ func categoryToProductRailSection(
 			RightButton: &atoms.ButtonData{
 				Type: atoms.ButtonTypeText,
 				Text: atoms.TextData{Text: seeAll},
-				Click: atoms.ClickData{
-					Type: atoms.ClickTypeOpenCategory,
-					Data: atoms.CategoryClickData{CategoryId: category.Id},
+				Click: atoms.CategoryClickData{
+					Type:       atoms.ClickTypeOpenCategory,
+					CategoryId: category.Id,
 				},
 			},
 		},

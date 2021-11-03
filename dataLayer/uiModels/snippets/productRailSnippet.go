@@ -15,6 +15,7 @@ type ProductRailSnippetData struct {
 	Category  *atoms.TextData  `json:"category,omitempty"`
 	Cost      *atoms.TextData  `json:"cost,omitempty"`
 	Image     *atoms.ImageData `json:"image,omitempty"`
+	Click     interface{}      `json:"click,omitempty"`
 }
 
 func MakeProductRailSnippet(
@@ -31,6 +32,10 @@ func MakeProductRailSnippet(
 		Category:  &atoms.TextData{Text: category.Name},
 		Cost:      &atoms.TextData{Text: cast.ToString(product.Cost)},
 		Image:     &atoms.ImageData{Url: product.CardImage},
+		Click: atoms.ProductClickData{
+			Type:      atoms.ClickTypeOpenProduct,
+			ProductId: product.Id,
+		},
 	}
 	return snippet
 }
