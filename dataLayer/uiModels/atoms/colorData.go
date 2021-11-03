@@ -1,5 +1,5 @@
 package atoms
 
 type ColorData struct {
-	Hex string `json:"hex"`
+	Name string `json:"name,omitempty"`
 }

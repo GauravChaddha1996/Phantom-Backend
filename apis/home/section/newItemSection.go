@@ -38,7 +38,10 @@ func NewItemsProductRailSection(
 
 	return &snippets.SnippetSectionData{
 		HeaderData: &snippets.SnippetSectionHeaderData{
-			Title: &atoms.TextData{Text: newlyIntroducedSectionHeader},
+			Title: &atoms.TextData{
+				Text:  newlyIntroducedSectionHeader,
+				Color: &atoms.ColorData{Name: atoms.COLOR_RED_700},
+			},
 		},
 		Snippets: &productRailSnippets,
 	}
