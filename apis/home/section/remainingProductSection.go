@@ -23,7 +23,9 @@ func RemainingProductsSection(
 
 	return &snippets.SnippetSectionData{
 		HeaderData: &snippets.SnippetSectionHeaderData{
-			Title:       &atoms.TextData{Text: remainingProductSectionHeader},
+			Title: &atoms.TextData{
+				Text: remainingProductSectionHeader,
+			},
 			Subtitle:    nil,
 			RightButton: nil,
 		},

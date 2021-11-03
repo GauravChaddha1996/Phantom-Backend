@@ -69,7 +69,9 @@ func categoryToProductRailSection(
 	}
 	return &snippets.SnippetSectionData{
 		HeaderData: &snippets.SnippetSectionHeaderData{
-			Title: &atoms.TextData{Text: category.Name},
+			Title: &atoms.TextData{
+				Text: category.Name,
+			},
 			RightButton: &atoms.ButtonData{
 				Type: atoms.ButtonTypeText,
 				Text: atoms.TextData{Text: seeAll},
