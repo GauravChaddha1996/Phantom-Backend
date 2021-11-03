@@ -30,7 +30,6 @@ func CategoryRailSection(
 		categoryRailSnippets = append(categoryRailSnippets, snippet)
 	}
 	return &snippets.SnippetSectionData{
-		Type: snippets.CategoryRailSnippet,
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title: &atoms.TextData{Text: categoryRailSectionHeader},
 		},

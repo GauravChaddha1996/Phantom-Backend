@@ -32,7 +32,6 @@ func RandomProductFullSection(
 	productFullSnippets = append(productFullSnippets, snippet)
 
 	return &snippets.SnippetSectionData{
-		Type:     snippets.ProductFullSnippet,
 		Snippets: &productFullSnippets,
 	}
 }

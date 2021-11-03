@@ -22,7 +22,6 @@ func RemainingProductsSection(
 	}
 
 	return &snippets.SnippetSectionData{
-		Type: snippets.ProductDualSnippet,
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title:       &atoms.TextData{Text: remainingProductSectionHeader},
 			Subtitle:    nil,

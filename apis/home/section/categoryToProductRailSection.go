@@ -68,7 +68,6 @@ func categoryToProductRailSection(
 		productsOfCategorySnippets = append(productsOfCategorySnippets, snippet)
 	}
 	return &snippets.SnippetSectionData{
-		Type: snippets.ProductRailSnippet,
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title: &atoms.TextData{Text: category.Name},
 			RightButton: &atoms.ButtonData{
