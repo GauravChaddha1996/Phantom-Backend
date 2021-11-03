@@ -60,6 +60,7 @@ func main() {
 	router.GET("/home", home.ApiHandler)
 	router.GET("/filter", filter.ApiHandler)
 	router.GET("/product", product.ApiHandler)
+	router.Static("/assets","./assets/")
 
 	// Start router
 	err := router.Run()

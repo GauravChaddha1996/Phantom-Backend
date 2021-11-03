@@ -16,7 +16,7 @@ func CategoryRailSection(
 	categoryDao *cacheDaos.AllCategoryIdsRedisDao,
 	apiDbResult models.ApiDbResult,
 ) *snippets.SnippetSectionData {
-	var categoryRailSnippets []snippets.CategoryRailSnippet
+	var categoryRailSnippets []snippets.CategoryRailSnippetData
 
 	allCategoryIds, err := categoryDao.ReadAllCategoryIds()
 	if err != nil {
@@ -30,10 +30,10 @@ func CategoryRailSection(
 		categoryRailSnippets = append(categoryRailSnippets, snippet)
 	}
 	return &snippets.SnippetSectionData{
-		Type: snippets.CategoryRailSection,
+		Type: snippets.CategoryRailSnippet,
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title: &atoms.TextData{Text: categoryRailSectionHeader},
 		},
-		Snippets: apiCommons.ToBaseSnippets(categoryRailSnippets),
+		Snippets: &categoryRailSnippets,
 	}
 }

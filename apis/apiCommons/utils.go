@@ -14,10 +14,10 @@ func LogApiError(data ApiErrorLogData) {
 	log.Println(string(marshaledApiErrorLogData))
 }
 
-func ToBaseSnippets(arr ...interface{}) *[]snippets.BaseSnippet {
-	baseSnippets := make([]snippets.BaseSnippet, len(arr))
+func ToBaseSnippets(arr ...interface{}) *[]snippets.BaseSnippetData {
+	baseSnippets := make([]snippets.BaseSnippetData, len(arr))
 	for index, element := range arr {
-		baseSnippets[index] = element.(snippets.BaseSnippet)
+		baseSnippets[index] = element.(snippets.BaseSnippetData)
 	}
 	return &baseSnippets
 }

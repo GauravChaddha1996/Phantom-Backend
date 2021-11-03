@@ -48,9 +48,9 @@ func ApiHandler(ctx *gin.Context) {
 
 	// Make api response
 	homeApiResponse := models.HomeApiResponse{
-		Status:   "success",
-		Message:  "",
-		Snippets: snippetSectionDataList,
+		Status:             "success",
+		Message:            "",
+		SnippetSectionList: snippetSectionDataList,
 	}
 	ctx.JSON(http.StatusOK, homeApiResponse)
 }

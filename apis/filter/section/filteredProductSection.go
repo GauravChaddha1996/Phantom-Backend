@@ -16,7 +16,7 @@ func GetFilteredProductSnippetSection(apiDbResult *models.ApiDbResult) snippets.
 	sectionHeader := getProductSectionHeader(len(productDualSnippets))
 
 	return snippets.SnippetSectionData{
-		Type: snippets.ProductDualSection,
+		Type: snippets.ProductDualSnippet,
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title:       &atoms.TextData{Text: sectionHeader},
 			Subtitle:    nil,
@@ -26,8 +26,8 @@ func GetFilteredProductSnippetSection(apiDbResult *models.ApiDbResult) snippets.
 	}
 }
 
-func getProductDualSnippetsFromDbResult(apiDbResult *models.ApiDbResult) []snippets.ProductDualSnippet {
-	var productDualSnippets []snippets.ProductDualSnippet
+func getProductDualSnippetsFromDbResult(apiDbResult *models.ApiDbResult) []snippets.ProductDualSnippetData {
+	var productDualSnippets []snippets.ProductDualSnippetData
 	for _, product := range apiDbResult.ProductsList {
 		brand := apiDbResult.BrandsMap[product.BrandId]
 		snippet := snippets.MakeProductDualSnippet(product, brand)

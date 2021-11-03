@@ -6,7 +6,8 @@ import (
 	"phantom/dataLayer/uiModels/atoms"
 )
 
-type ProductDualSnippet struct {
+type ProductDualSnippetData struct {
+	Type      string           `json:"type,omitempty"`
 	Id        int64            `json:"id,omitempty"`
 	Name      *atoms.TextData  `json:"name,omitempty"`
 	ShortDesc *atoms.TextData  `json:"short_desc,omitempty"`
@@ -18,8 +19,9 @@ type ProductDualSnippet struct {
 func MakeProductDualSnippet(
 	product dbModels.Product,
 	brand dbModels.Brand,
-) ProductDualSnippet {
-	snippet := ProductDualSnippet{
+) ProductDualSnippetData {
+	snippet := ProductDualSnippetData{
+		Type:      ProductDualSnippet,
 		Id:        product.Id,
 		Name:      &atoms.TextData{Text: product.Name},
 		ShortDesc: &atoms.TextData{Text: product.ShortDescription},

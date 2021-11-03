@@ -6,7 +6,8 @@ import (
 	"phantom/dataLayer/uiModels/atoms"
 )
 
-type ProductRailSnippet struct {
+type ProductRailSnippetData struct {
+	Type      string           `json:"type,omitempty"`
 	Id        int64            `json:"id,omitempty"`
 	Name      *atoms.TextData  `json:"name,omitempty"`
 	ShortDesc *atoms.TextData  `json:"short_desc,omitempty"`
@@ -20,8 +21,9 @@ func MakeProductRailSnippet(
 	product dbModels.Product,
 	category dbModels.Category,
 	brand dbModels.Brand,
-) ProductRailSnippet {
-	snippet := ProductRailSnippet{
+) ProductRailSnippetData {
+	snippet := ProductRailSnippetData{
+		Type:      ProductRailSnippet,
 		Id:        product.Id,
 		Name:      &atoms.TextData{Text: product.Name},
 		ShortDesc: &atoms.TextData{Text: product.ShortDescription},

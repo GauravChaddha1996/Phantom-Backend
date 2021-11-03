@@ -1,3 +1,3 @@
 package snippets
 
-type BaseSnippet interface{}
+type BaseSnippetData interface{}

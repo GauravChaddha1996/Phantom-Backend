@@ -50,7 +50,7 @@ func categoryToProductRailSection(
 	productIdMap *apiCommons.ProductIdMap,
 	apiDbResult models.ApiDbResult,
 ) *snippets.SnippetSectionData {
-	var productsOfCategorySnippets []snippets.ProductRailSnippet
+	var productsOfCategorySnippets []snippets.ProductRailSnippetData
 
 	productsOfCategoryId, err := categoryToProductCacheDao.ReadNProductsOfCategoryId(&category.Id, categoryToProductRailSectionCount)
 	if err != nil {
@@ -68,7 +68,7 @@ func categoryToProductRailSection(
 		productsOfCategorySnippets = append(productsOfCategorySnippets, snippet)
 	}
 	return &snippets.SnippetSectionData{
-		Type: snippets.ProductRailSection,
+		Type: snippets.ProductRailSnippet,
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title: &atoms.TextData{Text: category.Name},
 			RightButton: &atoms.ButtonData{
@@ -80,6 +80,6 @@ func categoryToProductRailSection(
 				},
 			},
 		},
-		Snippets: apiCommons.ToBaseSnippets(productsOfCategorySnippets),
+		Snippets: &productsOfCategorySnippets,
 	}
 }

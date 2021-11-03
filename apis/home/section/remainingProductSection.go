@@ -1,7 +1,6 @@
 package section
 
 import (
-	"phantom/apis/apiCommons"
 	"phantom/apis/home/models"
 	"phantom/dataLayer/uiModels/atoms"
 	"phantom/dataLayer/uiModels/snippets"
@@ -14,7 +13,7 @@ func RemainingProductsSection(
 	apiDbResult models.ApiDbResult,
 ) *snippets.SnippetSectionData {
 
-	var productDualSnippets []snippets.ProductDualSnippet
+	var productDualSnippets []snippets.ProductDualSnippetData
 	for _, productId := range *remainingProductIds {
 		product := apiDbResult.ProductsMap[productId]
 		brand := apiDbResult.BrandsMap[product.BrandId]
@@ -23,12 +22,12 @@ func RemainingProductsSection(
 	}
 
 	return &snippets.SnippetSectionData{
-		Type: snippets.ProductDualSection,
+		Type: snippets.ProductDualSnippet,
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title:       &atoms.TextData{Text: remainingProductSectionHeader},
 			Subtitle:    nil,
 			RightButton: nil,
 		},
-		Snippets: apiCommons.ToBaseSnippets(productDualSnippets),
+		Snippets: &productDualSnippets,
 	}
 }

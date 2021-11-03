@@ -18,7 +18,7 @@ func NewItemsProductRailSection(
 	productIdMap *apiCommons.ProductIdMap,
 	apiDbResult models.ApiDbResult,
 ) *snippets.SnippetSectionData {
-	var productRailSnippets []snippets.ProductRailSnippet
+	var productRailSnippets []snippets.ProductRailSnippetData
 
 	productIds, err := productCacheDao.ReadFirstNProductIds(newlyIntroducedSectionItemCount)
 	if err != nil {
@@ -37,10 +37,10 @@ func NewItemsProductRailSection(
 	}
 
 	return &snippets.SnippetSectionData{
-		Type: snippets.ProductRailSection,
+		Type: snippets.ProductRailSnippet,
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title: &atoms.TextData{Text: newlyIntroducedSectionHeader},
 		},
-		Snippets: apiCommons.ToBaseSnippets(productRailSnippets),
+		Snippets: &productRailSnippets,
 	}
 }

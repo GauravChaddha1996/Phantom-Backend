@@ -16,7 +16,7 @@ func RandomProductFullSection(
 	productIdMap *apiCommons.ProductIdMap,
 	apiDbResult models.ApiDbResult,
 ) *snippets.SnippetSectionData {
-	var productFullSnippets []snippets.ProductFullSnippet
+	var productFullSnippets []snippets.ProductFullSnippetData
 
 	randomProductId := findRandomProductId(ctx, productCacheDao, productIdMap)
 	if randomProductId == nil {
@@ -32,8 +32,8 @@ func RandomProductFullSection(
 	productFullSnippets = append(productFullSnippets, snippet)
 
 	return &snippets.SnippetSectionData{
-		Type:     snippets.ProductFullSection,
-		Snippets: apiCommons.ToBaseSnippets(productFullSnippets),
+		Type:     snippets.ProductFullSnippet,
+		Snippets: &productFullSnippets,
 	}
 }
 

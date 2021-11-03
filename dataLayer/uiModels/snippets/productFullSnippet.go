@@ -6,7 +6,8 @@ import (
 	"phantom/dataLayer/uiModels/atoms"
 )
 
-type ProductFullSnippet struct {
+type ProductFullSnippetData struct {
+	Type     string           `json:"type,omitempty"`
 	Id       int64            `json:"id,omitempty"`
 	Name     *atoms.TextData  `json:"name,omitempty"`
 	LongDesc *atoms.TextData  `json:"long_desc,omitempty"`
@@ -20,8 +21,9 @@ func MakeProductFullSnippet(
 	product dbModels.Product,
 	category dbModels.Category,
 	brand dbModels.Brand,
-) ProductFullSnippet {
-	snippet := ProductFullSnippet{
+) ProductFullSnippetData {
+	snippet := ProductFullSnippetData{
+		Type:     ProductFullSnippet,
 		Id:       product.Id,
 		Name:     &atoms.TextData{Text: product.Name},
 		LongDesc: &atoms.TextData{Text: product.LongDescription},
