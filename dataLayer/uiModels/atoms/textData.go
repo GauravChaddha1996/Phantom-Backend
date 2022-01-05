@@ -8,5 +8,17 @@ type TextData struct {
 }
 
 type MarkdownConfig struct {
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool        `json:"enabled,omitempty"`
+	Spans   interface{} `json:"spans,omitempty"`
+}
+
+const (
+	MK_FONT_SPAN = "font"
+)
+
+type MarkdownFontSpan struct {
+	Type  string `json:"type,omitempty"`
+	Style string `json:"style,omitempty"`
+	Start int    `json:"start,omitempty"`
+	End   int    `json:"end,omitempty"`
 }

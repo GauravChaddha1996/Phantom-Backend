@@ -7,15 +7,14 @@ import (
 )
 
 type ProductRailSnippetData struct {
-	Type      string           `json:"type,omitempty"`
-	Id        int64            `json:"id,omitempty"`
-	Name      *atoms.TextData  `json:"name,omitempty"`
-	ShortDesc *atoms.TextData  `json:"short_desc,omitempty"`
-	Brand     *atoms.TextData  `json:"brand,omitempty"`
-	Category  *atoms.TextData  `json:"category,omitempty"`
-	Cost      *atoms.TextData  `json:"cost,omitempty"`
-	Image     *atoms.ImageData `json:"image,omitempty"`
-	Click     interface{}      `json:"click,omitempty"`
+	Type             string           `json:"type,omitempty"`
+	Id               int64            `json:"id,omitempty"`
+	Name             *atoms.TextData  `json:"name,omitempty"`
+	ShortDesc        *atoms.TextData  `json:"short_desc,omitempty"`
+	BrandAndCategory *atoms.TextData  `json:"brand_and_category,omitempty"`
+	Cost             *atoms.TextData  `json:"cost,omitempty"`
+	Image            *atoms.ImageData `json:"image,omitempty"`
+	Click            interface{}      `json:"click,omitempty"`
 }
 
 func MakeProductRailSnippet(
@@ -23,19 +22,45 @@ func MakeProductRailSnippet(
 	category dbModels.Category,
 	brand dbModels.Brand,
 ) ProductRailSnippetData {
+	brandAndCategoryText, brandAndCategoryMarkdownConfig := MakeBrandAndCategoryText(brand, category)
 	snippet := ProductRailSnippetData{
-		Type:      ProductRailSnippet,
-		Id:        product.Id,
-		Name:      &atoms.TextData{Text: product.Name},
-		ShortDesc: &atoms.TextData{Text: product.ShortDescription},
-		Brand:     &atoms.TextData{Text: brand.Name},
-		Category:  &atoms.TextData{Text: category.Name},
-		Cost:      &atoms.TextData{Text: cast.ToString(product.Cost)},
-		Image:     &atoms.ImageData{Url: product.CardImage},
+		Type:             ProductRailSnippet,
+		Id:               product.Id,
+		Name:             &atoms.TextData{Text: product.Name},
+		ShortDesc:        &atoms.TextData{Text: product.ShortDescription},
+		BrandAndCategory: &atoms.TextData{Text: brandAndCategoryText, MarkdownConfig: &brandAndCategoryMarkdownConfig},
+		Cost:             &atoms.TextData{Text: "₹" + cast.ToString(product.Cost)},
+		Image:            &atoms.ImageData{Url: product.CardImage},
 		Click: atoms.ProductClickData{
 			Type:      atoms.ClickTypeOpenProduct,
 			ProductId: product.Id,
 		},
 	}
 	return snippet
+}
+
+func MakeBrandAndCategoryText(brand dbModels.Brand, category dbModels.Category) (string, atoms.MarkdownConfig) {
+	brandPrefix := "By "
+	categoryPrefix := " In "
+	brandText := brandPrefix + brand.Name
+	categoryText := categoryPrefix + category.Name
+	brandAndCategoryText := brandText + categoryText
+	brandAndCategoryMarkdownConfig := atoms.MarkdownConfig{
+		Enabled: true,
+		Spans: []interface{}{
+			atoms.MarkdownFontSpan{
+				Type:  atoms.MK_FONT_SPAN,
+				Style: atoms.FONT_MEDIUM_400,
+				Start: len(brandPrefix),
+				End:   len(brandText),
+			},
+			atoms.MarkdownFontSpan{
+				Type:  atoms.MK_FONT_SPAN,
+				Style: atoms.FONT_MEDIUM_400,
+				Start: len(brandText) + len(categoryPrefix),
+				End:   len(brandAndCategoryText),
+			},
+		},
+	}
+	return brandAndCategoryText, brandAndCategoryMarkdownConfig
 }

@@ -7,15 +7,14 @@ import (
 )
 
 type ProductFullSnippetData struct {
-	Type     string           `json:"type,omitempty"`
-	Id       int64            `json:"id,omitempty"`
-	Name     *atoms.TextData  `json:"name,omitempty"`
-	LongDesc *atoms.TextData  `json:"long_desc,omitempty"`
-	Brand    *atoms.TextData  `json:"brand,omitempty"`
-	Category *atoms.TextData  `json:"category,omitempty"`
-	Cost     *atoms.TextData  `json:"cost,omitempty"`
-	Image    *atoms.ImageData `json:"image,omitempty"`
-	Click    interface{}      `json:"click,omitempty"`
+	Type             string           `json:"type,omitempty"`
+	Id               int64            `json:"id,omitempty"`
+	Name             *atoms.TextData  `json:"name,omitempty"`
+	LongDesc         *atoms.TextData  `json:"long_desc,omitempty"`
+	BrandAndCategory *atoms.TextData  `json:"brand_and_category,omitempty"`
+	Cost             *atoms.TextData  `json:"cost,omitempty"`
+	Image            *atoms.ImageData `json:"image,omitempty"`
+	Click            interface{}      `json:"click,omitempty"`
 }
 
 func MakeProductFullSnippet(
@@ -23,15 +22,15 @@ func MakeProductFullSnippet(
 	category dbModels.Category,
 	brand dbModels.Brand,
 ) ProductFullSnippetData {
+	brandAndCategoryText, brandAndCategoryMarkdownConfig := MakeBrandAndCategoryText(brand, category)
 	snippet := ProductFullSnippetData{
-		Type:     ProductFullSnippet,
-		Id:       product.Id,
-		Name:     &atoms.TextData{Text: product.Name},
-		LongDesc: &atoms.TextData{Text: product.LongDescription},
-		Brand:    &atoms.TextData{Text: brand.Name},
-		Category: &atoms.TextData{Text: category.Name},
-		Cost:     &atoms.TextData{Text: cast.ToString(product.Cost)},
-		Image:    &atoms.ImageData{Url: product.CardImage},
+		Type:             ProductFullSnippet,
+		Id:               product.Id,
+		Name:             &atoms.TextData{Text: product.Name},
+		LongDesc:         &atoms.TextData{Text: product.LongDescription + "Soft cotton shirt made by well paid hard Soft cotton shirt made by well paid hard Soft cotton shirt made by well paid hard Soft cotton shirt made by well paid hard "},
+		BrandAndCategory: &atoms.TextData{Text: brandAndCategoryText, MarkdownConfig: &brandAndCategoryMarkdownConfig},
+		Cost:             &atoms.TextData{Text: cast.ToString(product.Cost)},
+		Image:            &atoms.ImageData{Url: product.CardImage},
 		Click: atoms.ProductClickData{
 			Type:      atoms.ClickTypeOpenProduct,
 			ProductId: product.Id,

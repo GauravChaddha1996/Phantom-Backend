@@ -1,14 +1,17 @@
 package section
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"phantom/apis/apiCommons"
 	"phantom/apis/home/models"
 	"phantom/dataLayer/cacheDaos"
+	"phantom/dataLayer/uiModels/atoms"
 	"phantom/dataLayer/uiModels/snippets"
 )
 
 const randomProductSectionMaxIteration = 20
+const randomProductSectionHeader = "Featuring"
 
 func RandomProductFullSection(
 	ctx *gin.Context,
@@ -20,11 +23,12 @@ func RandomProductFullSection(
 
 	randomProductId := findRandomProductId(ctx, productCacheDao, productIdMap)
 	if randomProductId == nil {
-		logData := apiCommons.NewApiErrorLogData(ctx, "Error finding random product id", nil)
+		msg := "Error finding random product id"
+		logData := apiCommons.NewApiErrorLogData(ctx, msg, errors.New(msg))
 		apiCommons.LogApiError(logData)
 		return nil
 	}
-	
+
 	product := apiDbResult.ProductsMap[*randomProductId]
 	category := apiDbResult.CategoriesMap[product.CategoryId]
 	brand := apiDbResult.BrandsMap[product.BrandId]
@@ -32,7 +36,8 @@ func RandomProductFullSection(
 	productFullSnippets = append(productFullSnippets, snippet)
 
 	return &snippets.SnippetSectionData{
-		Snippets: &productFullSnippets,
+		HeaderData: &snippets.SnippetSectionHeaderData{Title: &atoms.TextData{Text: randomProductSectionHeader}},
+		Snippets:   &productFullSnippets,
 	}
 }
 
