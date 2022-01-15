@@ -13,7 +13,7 @@ func MakeLongDescSection(apiDbResult *models.ApiDbResult) *snippets.SnippetSecti
 	}
 	textSectionSnippet := snippets.TextSectionSnippet{TextSectionArr: []snippets.TextSectionData{descSection}}
 	return &snippets.SnippetSectionData{
-		Type:       snippets.TextSection,
+		Type:       snippets.TextSnippet,
 		HeaderData: nil,
 		Snippets:   apiCommons.ToBaseSnippets(textSectionSnippet),
 	}

@@ -12,6 +12,7 @@ import (
 	"phantom/dataLayer/cacheDaos"
 	"phantom/dataLayer/databaseDaos"
 	"phantom/dataLayer/dbModels"
+	"phantom/dataLayer/uiModels/atoms"
 	"phantom/dataLayer/uiModels/snippets"
 	"phantom/ginRouter"
 	"sort"
@@ -114,13 +115,14 @@ func sortProducts(apiDbResult *models.ApiDbResult, apiRequest *models.ApiRequest
 func makeFilterApiResponse(
 	apiRequest *models.ApiRequest, apiDbResult *models.ApiDbResult, category *dbModels.Category,
 ) models.FilterApiResponse {
-	headerSection := section.MakeHeaderSection(category)
-	snippetSectionData := section.GetFilteredProductSnippetSection(apiDbResult)
+	snippetSectionData, sectionHeader := section.GetFilteredProductSnippetSection(apiDbResult)
 	return models.FilterApiResponse{
-		Status:            "success",
-		Message:           "",
-		Snippets:          []*snippets.SnippetSectionData{headerSection, &snippetSectionData},
-		FilterSheetUiData: models.MakeFilterSheetUiData(apiRequest, apiDbResult.PropertyToPropertyValueMap),
-		SortSheetUiData:   models.MakeSortSheetUiData(apiRequest.SortId),
+		Status:               "success",
+		Message:              "",
+		PageTitle:            atoms.TextData{Text: category.Name},
+		SnippetSectionHeader: atoms.TextData{Text: sectionHeader},
+		SnippetSectionList:   []*snippets.SnippetSectionData{&snippetSectionData},
+		FilterSheetUiData:    models.MakeFilterSheetUiData(apiRequest, apiDbResult.PropertyToPropertyValueMap),
+		SortSheetUiData:      models.MakeSortSheetUiData(apiRequest.SortId),
 	}
 }

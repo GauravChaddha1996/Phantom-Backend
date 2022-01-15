@@ -71,6 +71,9 @@ func readProductsFromDb(
 	wg *sync.WaitGroup,
 ) []dbModels.Product {
 	defer wg.Done()
+	if len(*productIds) == 0 {
+		return []dbModels.Product{}
+	}
 	productDbDao := databaseDaos.ProductSqlDao{DB: db}
 	products, err := productDbDao.ReadProducts(*productIds)
 	if err != nil {

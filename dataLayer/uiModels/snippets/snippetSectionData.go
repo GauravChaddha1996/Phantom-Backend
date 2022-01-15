@@ -6,9 +6,8 @@ const ProductRailSnippet = "ProductRailSnippet"
 const ProductFullSnippet = "ProductFullSnippet"
 const CategoryRailSnippet = "CategoryRailSnippet"
 const ProductDualSnippet = "ProductDualSnippet"
-const PageHeaderSection = "page_header_section"
+const TextSnippet = "TextSnippet"
 const ImagePagerSection = "image_pager_section"
-const TextSection = "text_section"
 const StepperSection = "stepper_section"
 
 type SnippetSectionData struct {

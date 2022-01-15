@@ -3,6 +3,8 @@ package models
 import (
 	"phantom/dataLayer/dbModels"
 	"phantom/dataLayer/uiModels/atoms"
+	"sort"
+	"strings"
 )
 
 type FilterSheetUiData struct {
@@ -29,6 +31,11 @@ func MakeFilterSheetUiData(
 		propertyUiSection := makePropertyUiSection(propertyValues, apiRequest, property)
 		propertyUiSections = append(propertyUiSections, propertyUiSection)
 	}
+	sort.SliceStable(propertyUiSections, func(one, two int) bool {
+		propertyUiSectionOne := propertyUiSections[one]
+		propertyUiSectionTwo := propertyUiSections[two]
+		return propertyUiSectionOne.Name.Text < propertyUiSectionTwo.Name.Text
+	})
 	return FilterSheetUiData{PropertyUiSections: propertyUiSections}
 }
 
@@ -43,7 +50,7 @@ func makePropertyUiSection(
 		propertyValueUiDataArr = append(propertyValueUiDataArr, propertyValueUiData)
 	}
 	propertyUiSection := FilterSheetPropertyUiSection{
-		Name:           atoms.TextData{Text: property.Name},
+		Name:           atoms.TextData{Text: strings.Title(property.Name)},
 		PropertyValues: propertyValueUiDataArr,
 	}
 	return propertyUiSection
@@ -55,7 +62,7 @@ func makePropertyValueUiData(
 ) FilterSheetPropertyValueUiData {
 	propertyValueUiData := FilterSheetPropertyValueUiData{
 		Id:       propertyValue.Id,
-		Name:     atoms.TextData{Text: propertyValue.Name},
+		Name:     atoms.TextData{Text: strings.Title(propertyValue.Name)},
 		Selected: apiRequest.PropertyValueIdsMap[propertyValue.Id],
 	}
 	return propertyValueUiData

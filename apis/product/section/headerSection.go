@@ -23,8 +23,6 @@ func MakeHeaderSection(apiDbResult *models.ApiDbResult) *snippets.SnippetSection
 	textSectionArr := []snippets.TextSectionData{nameTextSection, descTextSection, brandCategoryTextSection}
 	textSnippet := snippets.TextSectionSnippet{TextSectionArr: textSectionArr}
 	return &snippets.SnippetSectionData{
-		Type:       snippets.PageHeaderSection,
-		HeaderData: nil,
-		Snippets:   apiCommons.ToBaseSnippets(textSnippet),
+		Snippets: apiCommons.ToBaseSnippets(textSnippet),
 	}
 }

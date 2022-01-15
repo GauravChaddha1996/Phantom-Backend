@@ -6,8 +6,9 @@ const (
 )
 
 type CategoryClickData struct {
-	Type       string `json:"type,omitempty"`
-	CategoryId int64  `json:"category_id,omitempty"`
+	Type          string     `json:"type,omitempty"`
+	CategoryId    int64      `json:"category_id,omitempty"`
+	CategoryColor *ColorData `json:"category_color,omitempty"`
 }
 
 type ProductClickData struct {

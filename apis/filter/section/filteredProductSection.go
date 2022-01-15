@@ -2,28 +2,21 @@ package section
 
 import (
 	"fmt"
-	"phantom/apis/apiCommons"
 	"phantom/apis/filter/models"
-	"phantom/dataLayer/uiModels/atoms"
 	"phantom/dataLayer/uiModels/snippets"
 )
 
 const filteredProductSectionHeaderSingular = "Showing 1 product"
 const filteredProductSectionHeaderPlural = "Showing %#v products"
 
-func GetFilteredProductSnippetSection(apiDbResult *models.ApiDbResult) snippets.SnippetSectionData {
+func GetFilteredProductSnippetSection(apiDbResult *models.ApiDbResult) (snippets.SnippetSectionData, string) {
 	productDualSnippets := getProductDualSnippetsFromDbResult(apiDbResult)
 	sectionHeader := getProductSectionHeader(len(productDualSnippets))
 
 	return snippets.SnippetSectionData{
 		Type: snippets.ProductDualSnippet,
-		HeaderData: &snippets.SnippetSectionHeaderData{
-			Title:       &atoms.TextData{Text: sectionHeader},
-			Subtitle:    nil,
-			RightButton: nil,
-		},
-		Snippets: apiCommons.ToBaseSnippets(productDualSnippets),
-	}
+		Snippets: &productDualSnippets,
+	}, sectionHeader
 }
 
 func getProductDualSnippetsFromDbResult(apiDbResult *models.ApiDbResult) []snippets.ProductDualSnippetData {

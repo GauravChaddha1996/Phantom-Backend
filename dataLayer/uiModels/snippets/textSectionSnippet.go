@@ -8,6 +8,7 @@ import (
 )
 
 type TextSectionSnippet struct {
+	Type           string            `json:"type,omitempty"`
 	TextSectionArr []TextSectionData `json:"text_section_arr,omitempty"`
 }
 
@@ -39,6 +40,7 @@ func MakeTextSectionSnippetFromPropertyMapping(
 		textSectionArr = append(textSectionArr, section)
 	}
 	snippet := TextSectionSnippet{
+		Type:           TextSnippet,
 		TextSectionArr: textSectionArr,
 	}
 	return snippet
