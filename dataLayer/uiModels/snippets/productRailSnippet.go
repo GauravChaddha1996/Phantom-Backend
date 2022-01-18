@@ -22,7 +22,7 @@ func MakeProductRailSnippet(
 	category dbModels.Category,
 	brand dbModels.Brand,
 ) ProductRailSnippetData {
-	brandAndCategoryText, brandAndCategoryMarkdownConfig := MakeBrandAndCategoryText(brand, category)
+	brandAndCategoryText, brandAndCategoryMarkdownConfig := MakeBrandAndCategoryText(brand, category, atoms.FONT_MEDIUM_400)
 	snippet := ProductRailSnippetData{
 		Type:             ProductRailSnippet,
 		Id:               product.Id,
@@ -39,7 +39,9 @@ func MakeProductRailSnippet(
 	return snippet
 }
 
-func MakeBrandAndCategoryText(brand dbModels.Brand, category dbModels.Category) (string, atoms.MarkdownConfig) {
+func MakeBrandAndCategoryText(
+	brand dbModels.Brand, category dbModels.Category, fontStyle string,
+) (string, atoms.MarkdownConfig) {
 	brandPrefix := "By "
 	categoryPrefix := " In "
 	brandText := brandPrefix + brand.Name
@@ -50,13 +52,13 @@ func MakeBrandAndCategoryText(brand dbModels.Brand, category dbModels.Category) 
 		Spans: []interface{}{
 			atoms.MarkdownFontSpan{
 				Type:  atoms.MK_FONT_SPAN,
-				Style: atoms.FONT_MEDIUM_400,
+				Style: fontStyle,
 				Start: len(brandPrefix),
 				End:   len(brandText),
 			},
 			atoms.MarkdownFontSpan{
 				Type:  atoms.MK_FONT_SPAN,
-				Style: atoms.FONT_MEDIUM_400,
+				Style: fontStyle,
 				Start: len(brandText) + len(categoryPrefix),
 				End:   len(brandAndCategoryText),
 			},

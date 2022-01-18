@@ -22,7 +22,7 @@ func MakeProductFullSnippet(
 	category dbModels.Category,
 	brand dbModels.Brand,
 ) ProductFullSnippetData {
-	brandAndCategoryText, brandAndCategoryMarkdownConfig := MakeBrandAndCategoryText(brand, category)
+	brandAndCategoryText, brandAndCategoryMarkdownConfig := MakeBrandAndCategoryText(brand, category, atoms.FONT_MEDIUM_400)
 	snippet := ProductFullSnippetData{
 		Type:             ProductFullSnippet,
 		Id:               product.Id,

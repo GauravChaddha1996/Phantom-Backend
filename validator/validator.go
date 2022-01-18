@@ -18,12 +18,12 @@ var tagName = "validate"
 
 // Daos used in validation
 var categoryCacheDao *cacheDaos.AllCategoryIdsRedisDao
-var propertyValueIdCacheDao *cacheDaos.PropertyValueIdToPropertyIdRedisDao
+var propertyValueIdCacheDao *cacheDaos.AllPropertyValueIdsRedisDao
 var productCacheDao *cacheDaos.AllProductIdsRedisDao
 
 func Init(pool *redis.Pool) {
 	categoryCacheDao = &cacheDaos.AllCategoryIdsRedisDao{Pool: pool}
-	propertyValueIdCacheDao = &cacheDaos.PropertyValueIdToPropertyIdRedisDao{Pool: pool}
+	propertyValueIdCacheDao = &cacheDaos.AllPropertyValueIdsRedisDao{Pool: pool}
 	productCacheDao = &cacheDaos.AllProductIdsRedisDao{Pool: pool}
 }
 

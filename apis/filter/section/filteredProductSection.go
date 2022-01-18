@@ -14,7 +14,6 @@ func GetFilteredProductSnippetSection(apiDbResult *models.ApiDbResult) (snippets
 	sectionHeader := getProductSectionHeader(len(productDualSnippets))
 
 	return snippets.SnippetSectionData{
-		Type: snippets.ProductDualSnippet,
 		Snippets: &productDualSnippets,
 	}, sectionHeader
 }

@@ -14,14 +14,6 @@ func LogApiError(data ApiErrorLogData) {
 	log.Println(string(marshaledApiErrorLogData))
 }
 
-func ToBaseSnippets(arr ...interface{}) *[]snippets.BaseSnippetData {
-	baseSnippets := make([]snippets.BaseSnippetData, len(arr))
-	for index, element := range arr {
-		baseSnippets[index] = element.(snippets.BaseSnippetData)
-	}
-	return &baseSnippets
-}
-
 func AppendIgnoringNils(
 	slice []*snippets.SnippetSectionData, elems ...*snippets.SnippetSectionData,
 ) []*snippets.SnippetSectionData {

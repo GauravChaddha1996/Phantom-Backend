@@ -7,11 +7,10 @@ const ProductFullSnippet = "ProductFullSnippet"
 const CategoryRailSnippet = "CategoryRailSnippet"
 const ProductDualSnippet = "ProductDualSnippet"
 const TextSnippet = "TextSnippet"
-const ImagePagerSection = "image_pager_section"
-const StepperSection = "stepper_section"
+const ImagePagerSnippet = "ImagePagerSnippet"
+const StepperSnippet = "StepperSnippet"
 
 type SnippetSectionData struct {
-	Type       string                    `json:"type,omitempty"`
 	HeaderData *SnippetSectionHeaderData `json:"header_data,omitempty"`
 	Snippets   interface{}               `json:"snippets,omitempty"`
 }

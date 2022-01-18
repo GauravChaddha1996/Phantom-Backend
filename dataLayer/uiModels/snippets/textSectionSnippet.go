@@ -7,19 +7,20 @@ import (
 	"strings"
 )
 
-type TextSectionSnippet struct {
+type TextSnippetData struct {
 	Type           string            `json:"type,omitempty"`
 	TextSectionArr []TextSectionData `json:"text_section_arr,omitempty"`
 }
 
 type TextSectionData struct {
-	Title    *atoms.TextData `json:"title,omitempty"`
-	Subtitle *atoms.TextData `json:"subtitle,omitempty"`
+	Title     *atoms.TextData `json:"title,omitempty"`
+	Subtitle  *atoms.TextData `json:"subtitle,omitempty"`
+	Subtitle2 *atoms.TextData `json:"subtitle2,omitempty"`
 }
 
 func MakeTextSectionSnippetFromPropertyMapping(
 	propertyMapping *map[dbModels.Property][]dbModels.PropertyValue,
-) TextSectionSnippet {
+) TextSnippetData {
 	var textSectionArr = make([]TextSectionData, 0)
 	for property, propertyValueArr := range *propertyMapping {
 		// Find combined property value
@@ -30,16 +31,20 @@ func MakeTextSectionSnippetFromPropertyMapping(
 		combinedPropertyValue := strings.Join(propertyValueStringArr, ", ")
 
 		section := TextSectionData{
-			&atoms.TextData{
-				Text: fmt.Sprintf("%s:", property.Name),
+			Title: &atoms.TextData{
+				Text:  fmt.Sprintf("%s", strings.Title(property.Name)),
+				Color: &atoms.ColorData{Name: atoms.COLOR_GREY_900},
+				Font:  &atoms.FontData{Style: atoms.FONT_MEDIUM_500},
 			},
-			&atoms.TextData{
-				Text: combinedPropertyValue,
+			Subtitle: &atoms.TextData{
+				Text:  strings.Title(combinedPropertyValue),
+				Color: &atoms.ColorData{Name: atoms.COLOR_GREY_700},
+				Font:  &atoms.FontData{Style: atoms.FONT_MEDIUM_400},
 			},
 		}
 		textSectionArr = append(textSectionArr, section)
 	}
-	snippet := TextSectionSnippet{
+	snippet := TextSnippetData{
 		Type:           TextSnippet,
 		TextSectionArr: textSectionArr,
 	}

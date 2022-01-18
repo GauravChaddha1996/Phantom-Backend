@@ -25,16 +25,16 @@ func ApiHandler(ctx *gin.Context) {
 	}
 
 	// Make all sections
-	headerSection := section.MakeHeaderSection(apiDbResult)
 	imagesSection := section.MakeImagesSection(apiDbResult)
+	headerSection := section.MakeHeaderSection(apiDbResult)
 	stepperSection := section.MakeStepperSection(apiDbResult)
 	longDescSection := section.MakeLongDescSection(apiDbResult)
 	propertyMappingSection := section.MakePropertyMappingSection(apiDbResult)
 
 	// Arrange sections
 	var sections []*snippets.SnippetSectionData
-	sections = append(sections, headerSection)
 	sections = append(sections, imagesSection)
+	sections = append(sections, headerSection)
 	sections = append(sections, stepperSection)
 	sections = append(sections, longDescSection)
 	sections = append(sections, propertyMappingSection)

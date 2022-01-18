@@ -5,18 +5,20 @@ import (
 	"phantom/dataLayer/uiModels/atoms"
 )
 
-type ImagePagerSnippet struct {
+type ImagePagerSnippetData struct {
+	Type   string            `json:"type,omitempty"`
 	Images []atoms.ImageData `json:"images,omitempty"`
 }
 
 func MakeProductImagesPagerSnippet(
 	productImages []dbModels.ProductImage,
-) ImagePagerSnippet {
+) ImagePagerSnippetData {
 	var images = make([]atoms.ImageData, len(productImages))
 	for i, productImage := range productImages {
 		images[i] = atoms.ImageData{Url: productImage.Url}
 	}
-	snippet := ImagePagerSnippet{
+	snippet := ImagePagerSnippetData{
+		Type:   ImagePagerSnippet,
 		Images: images,
 	}
 	return snippet

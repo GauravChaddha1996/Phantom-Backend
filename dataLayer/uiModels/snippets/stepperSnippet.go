@@ -5,7 +5,8 @@ import (
 	"phantom/dataLayer/uiModels/atoms"
 )
 
-type StepperSnippet struct {
+type StepperSnippetData struct {
+	Type          string          `json:"type,omitempty"`
 	Title         *atoms.TextData `json:"title,omitempty"`
 	StepperConfig StepperConfig   `json:"stepper_config"`
 }
@@ -13,9 +14,10 @@ type StepperSnippet struct {
 type StepperConfig struct {
 }
 
-func MakeStepperSnippet(cost int64) StepperSnippet {
-	return StepperSnippet{
-		Title:         &atoms.TextData{Text: fmt.Sprintf("₹%d", cost)},
+func MakeStepperSnippet(cost int64) StepperSnippetData {
+	return StepperSnippetData{
+		Type:          StepperSnippet,
+		Title:         &atoms.TextData{Text: fmt.Sprintf("Add for ₹%d", cost)},
 		StepperConfig: StepperConfig{},
 	}
 }

@@ -8,11 +8,11 @@ import (
 
 const AllPropertyValueIdCacheName = "all_property_value_id_cache"
 
-type PropertyValueIdToPropertyIdRedisDao struct {
+type AllPropertyValueIdsRedisDao struct {
 	Pool *redis.Pool
 }
 
-func (dao PropertyValueIdToPropertyIdRedisDao) DeleteWholeCache() error {
+func (dao AllPropertyValueIdsRedisDao) DeleteWholeCache() error {
 	conn := dao.Pool.Get()
 	_, delErr := conn.Do("DEL", AllPropertyValueIdCacheName)
 	if delErr != nil {
@@ -21,7 +21,7 @@ func (dao PropertyValueIdToPropertyIdRedisDao) DeleteWholeCache() error {
 	return nil
 }
 
-func (dao PropertyValueIdToPropertyIdRedisDao) SetPropertyValueIdsCache(dataArr *[]dbModels.PropertyValue) error {
+func (dao AllPropertyValueIdsRedisDao) SetPropertyValueIdsCache(dataArr *[]dbModels.PropertyValue) error {
 	conn := dao.Pool.Get()
 	var err error
 	for _, propertyValue := range *dataArr {
@@ -33,7 +33,7 @@ func (dao PropertyValueIdToPropertyIdRedisDao) SetPropertyValueIdsCache(dataArr 
 	return err
 }
 
-func (dao PropertyValueIdToPropertyIdRedisDao) IsPropertyIdValid(propertyValueId int64) (bool, error) {
+func (dao AllPropertyValueIdsRedisDao) IsPropertyIdValid(propertyValueId int64) (bool, error) {
 	conn := dao.Pool.Get()
 	exists, readErr := redis.Int(conn.Do("SISMEMBER", AllPropertyValueIdCacheName, propertyValueId))
 	if readErr != nil {
