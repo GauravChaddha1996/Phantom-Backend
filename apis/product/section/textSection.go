@@ -12,7 +12,6 @@ func MakePropertyMappingSection(apiDbResult *models.ApiDbResult) *snippets.Snipp
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title: &atoms.TextData{
 				Text: "Specifications",
-				Font: &atoms.FontData{Style: atoms.FONT_SEMIBOLD_500},
 			},
 		},
 		Snippets: []snippets.TextSnippetData{propertyMappingSection},

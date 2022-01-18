@@ -32,14 +32,12 @@ func MakeTextSectionSnippetFromPropertyMapping(
 
 		section := TextSectionData{
 			Title: &atoms.TextData{
-				Text:  fmt.Sprintf("%s", strings.Title(property.Name)),
-				Color: &atoms.ColorData{Name: atoms.COLOR_GREY_900},
-				Font:  &atoms.FontData{Style: atoms.FONT_MEDIUM_500},
+				Text: fmt.Sprintf("%s", strings.Title(property.Name)),
+				Font: &atoms.FontData{Style: atoms.FontTitleMedium},
 			},
 			Subtitle: &atoms.TextData{
-				Text:  strings.Title(combinedPropertyValue),
-				Color: &atoms.ColorData{Name: atoms.COLOR_GREY_700},
-				Font:  &atoms.FontData{Style: atoms.FONT_MEDIUM_400},
+				Text: strings.Title(combinedPropertyValue),
+				Font: &atoms.FontData{Style: atoms.FontBodyMedium},
 			},
 		}
 		textSectionArr = append(textSectionArr, section)

@@ -22,7 +22,7 @@ func MakeProductRailSnippet(
 	category dbModels.Category,
 	brand dbModels.Brand,
 ) ProductRailSnippetData {
-	brandAndCategoryText, brandAndCategoryMarkdownConfig := MakeBrandAndCategoryText(brand, category, atoms.FONT_MEDIUM_400)
+	brandAndCategoryText, brandAndCategoryMarkdownConfig := MakeBrandAndCategoryText(brand, category, atoms.FontBodyLarge)
 	snippet := ProductRailSnippetData{
 		Type:             ProductRailSnippet,
 		Id:               product.Id,

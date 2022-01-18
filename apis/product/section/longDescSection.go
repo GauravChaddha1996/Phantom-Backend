@@ -10,8 +10,8 @@ func MakeLongDescSection(apiDbResult *models.ApiDbResult) *snippets.SnippetSecti
 	longDescSection := snippets.TextSectionData{
 		Title: &atoms.TextData{
 			Text:  apiDbResult.Product.LongDescription,
-			Color: &atoms.ColorData{Name: atoms.COLOR_GREY_700},
-			Font:  &atoms.FontData{Style: atoms.FONT_REGULAR_600},
+			Color: &atoms.ColorData{Name: atoms.ColorOnBackground},
+			Font:  &atoms.FontData{Style: atoms.FontBodyMedium},
 		},
 	}
 	textSectionSnippet := snippets.TextSnippetData{Type: snippets.TextSnippet, TextSectionArr: []snippets.TextSectionData{longDescSection}}
@@ -19,7 +19,6 @@ func MakeLongDescSection(apiDbResult *models.ApiDbResult) *snippets.SnippetSecti
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title: &atoms.TextData{
 				Text: "About the product",
-				Font: &atoms.FontData{Style: atoms.FONT_SEMIBOLD_500},
 			},
 		},
 		Snippets: []snippets.TextSnippetData{textSectionSnippet},

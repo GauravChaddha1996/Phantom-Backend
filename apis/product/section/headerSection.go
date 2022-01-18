@@ -8,23 +8,17 @@ import (
 
 func MakeHeaderSection(apiDbResult *models.ApiDbResult) *snippets.SnippetSectionData {
 	product := apiDbResult.Product
-	brandCategoryText, markdownConfig := snippets.MakeBrandAndCategoryText(*apiDbResult.Brand, *apiDbResult.Category, atoms.FONT_SEMIBOLD_600)
+	brandCategoryText, markdownConfig := snippets.MakeBrandAndCategoryText(*apiDbResult.Brand, *apiDbResult.Category, atoms.FontBodyLarge)
 
 	nameAndDescTextSection := snippets.TextSectionData{
 		Title: &atoms.TextData{
-			Text:  product.Name,
-			Color: &atoms.ColorData{Name: atoms.COLOR_GREY_900},
-			Font:  &atoms.FontData{Style: atoms.FONT_SEMIBOLD_600},
+			Text: product.Name,
 		},
 		Subtitle: &atoms.TextData{
-			Text:  product.ShortDescription,
-			Color: &atoms.ColorData{Name: atoms.COLOR_GREY_500},
-			Font:  &atoms.FontData{Style: atoms.FONT_REGULAR_400},
+			Text: product.ShortDescription,
 		},
 		Subtitle2: &atoms.TextData{
 			Text:           brandCategoryText,
-			Color:          &atoms.ColorData{Name: atoms.COLOR_GREY_800},
-			Font:           &atoms.FontData{Style: atoms.FONT_MEDIUM_600},
 			MarkdownConfig: &markdownConfig,
 		},
 	}
