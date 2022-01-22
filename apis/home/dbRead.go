@@ -52,9 +52,10 @@ func readFromDb(ctx *gin.Context) (models.ApiDbResult, error) {
 
 	// Return actual db results
 	return models.ApiDbResult{
-		ProductsMap:   productsMap,
-		CategoriesMap: categoriesMap,
-		BrandsMap:     brandsMap,
+		ProductsMap:      productsMap,
+		CategoriesMap:    categoriesMap,
+		BrandsMap:        brandsMap,
+		NewProductIdsMap: apiCommons.NewProductIdMap(map[int64]*dbModels.Product{}),
 	}, nil
 }
 

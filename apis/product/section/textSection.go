@@ -7,13 +7,13 @@ import (
 )
 
 func MakePropertyMappingSection(apiDbResult *models.ApiDbResult) *snippets.SnippetSectionData {
-	propertyMappingSection := snippets.MakeTextSectionSnippetFromPropertyMapping(apiDbResult.PropertyMapping)
+	propertyMappingSection := snippets.MakeTextSnippetDataArrFromPropertyMapping(apiDbResult.PropertyMapping)
 	return &snippets.SnippetSectionData{
 		HeaderData: &snippets.SnippetSectionHeaderData{
 			Title: &atoms.TextData{
 				Text: "Specifications",
 			},
 		},
-		Snippets: []snippets.TextSnippetData{propertyMappingSection},
+		Snippets: propertyMappingSection,
 	}
 }

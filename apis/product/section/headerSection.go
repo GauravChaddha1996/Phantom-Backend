@@ -8,9 +8,10 @@ import (
 
 func MakeHeaderSection(apiDbResult *models.ApiDbResult) *snippets.SnippetSectionData {
 	product := apiDbResult.Product
-	brandCategoryText, markdownConfig := snippets.MakeBrandAndCategoryText(*apiDbResult.Brand, *apiDbResult.Category, atoms.FontBodyLarge)
+	brandCategoryText := snippets.MakeBrandAndCategoryText(*apiDbResult.Brand, *apiDbResult.Category)
 
-	nameAndDescTextSection := snippets.TextSectionData{
+	nameAndDescTextSection := snippets.TextSnippetData{
+		Type: snippets.TextSnippet,
 		Title: &atoms.TextData{
 			Text: product.Name,
 		},
@@ -18,13 +19,11 @@ func MakeHeaderSection(apiDbResult *models.ApiDbResult) *snippets.SnippetSection
 			Text: product.ShortDescription,
 		},
 		Subtitle2: &atoms.TextData{
-			Text:           brandCategoryText,
-			MarkdownConfig: &markdownConfig,
+			Text: brandCategoryText,
 		},
+		BottomSeparator: true,
 	}
-	textSectionArr := []snippets.TextSectionData{nameAndDescTextSection}
-	textSnippet := snippets.TextSnippetData{Type: snippets.TextSnippet, TextSectionArr: textSectionArr}
 	return &snippets.SnippetSectionData{
-		Snippets: []snippets.TextSnippetData{textSnippet},
+		Snippets: []snippets.TextSnippetData{nameAndDescTextSection},
 	}
 }

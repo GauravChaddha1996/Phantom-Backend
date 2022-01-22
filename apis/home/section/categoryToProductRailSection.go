@@ -11,7 +11,7 @@ import (
 	"phantom/dataLayer/uiModels/snippets"
 )
 
-const categoryToProductRailSectionCount = 1
+const categoryToProductRailSectionCount = 4
 const seeAll = "See all"
 
 func CategoryToProductRailSections(
@@ -64,7 +64,7 @@ func categoryToProductRailSection(
 		product := apiDbResult.ProductsMap[productId]
 		category := apiDbResult.CategoriesMap[product.CategoryId]
 		brand := apiDbResult.BrandsMap[product.BrandId]
-		snippet := snippets.MakeProductRailSnippet(*product, *category, *brand)
+			snippet := snippets.MakeProductRailSnippet(*product, *category, *brand, apiDbResult.NewProductIdsMap.Contains(productId))
 		productsOfCategorySnippets = append(productsOfCategorySnippets, snippet)
 	}
 	return &snippets.SnippetSectionData{

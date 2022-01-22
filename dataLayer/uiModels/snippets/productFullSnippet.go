@@ -22,14 +22,14 @@ func MakeProductFullSnippet(
 	category dbModels.Category,
 	brand dbModels.Brand,
 ) ProductFullSnippetData {
-	brandAndCategoryText, brandAndCategoryMarkdownConfig := MakeBrandAndCategoryText(brand, category, atoms.FontBodyLarge)
+	brandAndCategoryText := MakeBrandAndCategoryText(brand, category)
 	snippet := ProductFullSnippetData{
 		Type:             ProductFullSnippet,
 		Id:               product.Id,
 		Name:             &atoms.TextData{Text: product.Name},
-		LongDesc:         &atoms.TextData{Text: product.LongDescription + "Soft cotton shirt made by well paid hard Soft cotton shirt made by well paid hard Soft cotton shirt made by well paid hard Soft cotton shirt made by well paid hard "},
-		BrandAndCategory: &atoms.TextData{Text: brandAndCategoryText, MarkdownConfig: &brandAndCategoryMarkdownConfig},
-		Cost:             &atoms.TextData{Text: cast.ToString(product.Cost)},
+		LongDesc:         &atoms.TextData{Text: product.LongDescription},
+		BrandAndCategory: &atoms.TextData{Text: brandAndCategoryText},
+		Cost:             &atoms.TextData{Text: "₹" + cast.ToString(product.Cost)},
 		Image:            &atoms.ImageData{Url: product.CardImage},
 		Click: atoms.ProductClickData{
 			Type:      atoms.ClickTypeOpenProduct,

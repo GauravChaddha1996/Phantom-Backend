@@ -9,7 +9,8 @@ import (
 	"phantom/dataLayer/uiModels/snippets"
 )
 
-const newlyIntroducedSectionItemCount = 2
+const NewlyIntroducedProductIdsTotalCount = 8
+const newlyIntroducedSectionItemCount = 4
 const newlyIntroducedSectionHeader = "Newly introduced"
 
 func NewItemsProductRailSection(
@@ -20,19 +21,21 @@ func NewItemsProductRailSection(
 ) *snippets.SnippetSectionData {
 	var productRailSnippets []snippets.ProductRailSnippetData
 
-	productIds, err := productCacheDao.ReadFirstNProductIds(newlyIntroducedSectionItemCount)
+	newProductIds, err := productCacheDao.ReadFirstNProductIds(NewlyIntroducedProductIdsTotalCount)
 	if err != nil {
 		logData := apiCommons.NewApiErrorLogData(ctx, "Error reading first n products from cache", err)
 		apiCommons.LogApiError(logData)
 		return nil
 	}
+	apiDbResult.NewProductIdsMap.PutAllInt64s(newProductIds)
 
-	productIdMap.PutAllInt64s(productIds)
-	for _, productId := range *productIds {
+	newProductIdsForSection := (*newProductIds)[:newlyIntroducedSectionItemCount]
+	productIdMap.PutAllInt64s(&newProductIdsForSection)
+	for _, productId := range newProductIdsForSection {
 		product := apiDbResult.ProductsMap[productId]
 		category := apiDbResult.CategoriesMap[product.CategoryId]
 		brand := apiDbResult.BrandsMap[product.BrandId]
-		snippet := snippets.MakeProductRailSnippet(*product, *category, *brand)
+		snippet := snippets.MakeProductRailSnippet(*product, *category, *brand, true)
 		productRailSnippets = append(productRailSnippets, snippet)
 	}
 

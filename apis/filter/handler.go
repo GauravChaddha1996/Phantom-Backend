@@ -22,12 +22,15 @@ const apiFilteringErr = "Err code: 1"
 const apiDbReadErr = "Err code: 2"
 const apiPropertyForCategoryErr = "Err code: 3"
 const apiCategoryReadErr = "Err code: 4"
+const apiProductCacheReadErr = "Err code: 5"
+const newlyIntroducedProductIdsTotalCount = 8
 
 func ApiHandler(ctx *gin.Context) {
 	// Initialization or find dependencies
-	redisPool := ctx.MustGet(ginRouter.REDIS_POOL).(*redis.Pool)
+	redisCachePool := ctx.MustGet(ginRouter.REDIS_POOL).(*redis.Pool)
 	db := ctx.MustGet(ginRouter.SQL_DB).(*sql.DB)
-	categoryDao := databaseDaos.CategorySqlDao{DB: db}
+	categoryDbDao := databaseDaos.CategorySqlDao{DB: db}
+	productCacheDao := cacheDaos.AllProductIdsRedisDao{Pool: redisCachePool}
 
 	// Read api request model
 	apiRequest, apiRequestReadErr := models.ReadApiRequestModel(ctx)
@@ -37,21 +40,21 @@ func ApiHandler(ctx *gin.Context) {
 	}
 
 	// Find category data
-	category, categoryReadErr := categoryDao.ReadCategoryComplete(apiRequest.CategoryId)
+	category, categoryReadErr := categoryDbDao.ReadCategoryComplete(apiRequest.CategoryId)
 	if categoryReadErr != nil {
 		ctx.JSON(http.StatusInternalServerError, apiCategoryReadErr)
 		return
 	}
 
 	// Find filtered product ids
-	productIds, filteringErr := findFilteredProductIds(ctx, redisPool, apiRequest)
+	productIds, filteringErr := findFilteredProductIds(ctx, redisCachePool, apiRequest)
 	if filteringErr != nil {
 		ctx.JSON(http.StatusInternalServerError, apiFilteringErr)
 		return
 	}
 
 	// Find property ids of category id
-	propertyIds, propertyForCategoryErr := findPropertyIdsOfCategoryId(ctx, redisPool, apiRequest.CategoryId)
+	propertyIds, propertyForCategoryErr := findPropertyIdsOfCategoryId(ctx, redisCachePool, apiRequest.CategoryId)
 	if propertyForCategoryErr != nil {
 		ctx.JSON(http.StatusInternalServerError, apiPropertyForCategoryErr)
 		return
@@ -63,6 +66,16 @@ func ApiHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, apiDbReadErr)
 		return
 	}
+
+	// Set newly introduced product ids in api db result
+	newProductIds, err := productCacheDao.ReadFirstNProductIds(newlyIntroducedProductIdsTotalCount)
+	if err != nil {
+		logData := apiCommons.NewApiErrorLogData(ctx, "Error reading first n products from cache", err)
+		apiCommons.LogApiError(logData)
+		ctx.JSON(http.StatusInternalServerError, apiProductCacheReadErr)
+		return
+	}
+	apiDbResult.NewProductIdsMap.PutAllInt64s(newProductIds)
 
 	// Sort on api request model basis
 	sortProducts(apiDbResult, apiRequest)
@@ -117,12 +130,15 @@ func makeFilterApiResponse(
 ) models.FilterApiResponse {
 	snippetSectionData, sectionHeader := section.GetFilteredProductSnippetSection(apiDbResult)
 	return models.FilterApiResponse{
-		Status:               "success",
-		Message:              "",
-		PageTitle:            atoms.TextData{Text: category.Name},
-		SnippetSectionHeader: atoms.TextData{Text: sectionHeader},
-		SnippetSectionList:   []*snippets.SnippetSectionData{&snippetSectionData},
-		FilterSheetUiData:    models.MakeFilterSheetUiData(apiRequest, apiDbResult.PropertyToPropertyValueMap),
-		SortSheetUiData:      models.MakeSortSheetUiData(apiRequest.SortId),
+		Status:    "success",
+		Message:   "",
+		PageTitle: atoms.TextData{Text: category.Name},
+		SnippetSectionHeader: atoms.TextData{
+			Text: sectionHeader,
+			Font: &atoms.FontData{Style: atoms.FontTitleMedium},
+		},
+		SnippetSectionList: []*snippets.SnippetSectionData{&snippetSectionData},
+		FilterSheetUiData:  models.MakeFilterSheetUiData(apiRequest, apiDbResult.PropertyToPropertyValueMap),
+		SortSheetUiData:    models.MakeSortSheetUiData(apiRequest.SortId),
 	}
 }

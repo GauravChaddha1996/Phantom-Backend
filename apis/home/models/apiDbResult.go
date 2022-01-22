@@ -1,11 +1,15 @@
 package models
 
-import "phantom/dataLayer/dbModels"
+import (
+	"phantom/apis/apiCommons"
+	"phantom/dataLayer/dbModels"
+)
 
 type ApiDbResult struct {
-	ProductsMap   map[int64]*dbModels.Product
-	CategoriesMap map[int64]*dbModels.Category
-	BrandsMap     map[int64]*dbModels.Brand
+	ProductsMap      map[int64]*dbModels.Product
+	CategoriesMap    map[int64]*dbModels.Category
+	BrandsMap        map[int64]*dbModels.Brand
+	NewProductIdsMap *apiCommons.ProductIdMap
 }
 
 func EmptyHomeApiDbResult() ApiDbResult {
@@ -13,5 +17,6 @@ func EmptyHomeApiDbResult() ApiDbResult {
 		map[int64]*dbModels.Product{},
 		map[int64]*dbModels.Category{},
 		map[int64]*dbModels.Brand{},
+		apiCommons.NewProductIdMap(map[int64]*dbModels.Product{}),
 	}
 }

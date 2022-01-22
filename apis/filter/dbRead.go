@@ -60,6 +60,7 @@ func readFromDb(ctx *gin.Context, productIds *[]int64, propertyIds *[]int64) (*m
 		ProductsList:               productsList,
 		BrandsMap:                  brandsMap,
 		PropertyToPropertyValueMap: propertyToPropertyValueMap,
+		NewProductIdsMap:           apiCommons.NewProductIdMap(map[int64]*dbModels.Product{}),
 	}, nil
 }
 

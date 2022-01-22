@@ -27,7 +27,6 @@ func ApiHandler(ctx *gin.Context) {
 	// Make all sections
 	imagesSection := section.MakeImagesSection(apiDbResult)
 	headerSection := section.MakeHeaderSection(apiDbResult)
-	stepperSection := section.MakeStepperSection(apiDbResult)
 	longDescSection := section.MakeLongDescSection(apiDbResult)
 	propertyMappingSection := section.MakePropertyMappingSection(apiDbResult)
 
@@ -35,15 +34,15 @@ func ApiHandler(ctx *gin.Context) {
 	var sections []*snippets.SnippetSectionData
 	sections = append(sections, imagesSection)
 	sections = append(sections, headerSection)
-	sections = append(sections, stepperSection)
 	sections = append(sections, longDescSection)
 	sections = append(sections, propertyMappingSection)
 
 	// Make api response
 	apiResponse := models.ProductApiResponse{
-		Status:   "success",
-		Message:  "",
-		Snippets: sections,
+		Status:         "success",
+		Message:        "",
+		Snippets:       sections,
+		StepperSnippet: snippets.MakeStepperSnippet(apiDbResult.Product.Cost),
 	}
 
 	ctx.JSON(http.StatusOK, apiResponse)

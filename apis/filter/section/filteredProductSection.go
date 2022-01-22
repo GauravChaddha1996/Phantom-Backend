@@ -22,7 +22,7 @@ func getProductDualSnippetsFromDbResult(apiDbResult *models.ApiDbResult) []snipp
 	var productDualSnippets []snippets.ProductDualSnippetData
 	for _, product := range apiDbResult.ProductsList {
 		brand := apiDbResult.BrandsMap[product.BrandId]
-		snippet := snippets.MakeProductDualSnippet(product, brand)
+		snippet := snippets.MakeProductDualSnippet(product, brand, apiDbResult.NewProductIdsMap.Contains(product.Id))
 		productDualSnippets = append(productDualSnippets, snippet)
 	}
 	return productDualSnippets
