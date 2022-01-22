@@ -23,13 +23,15 @@ const apiDbReadErr = "Err code: 2"
 const apiPropertyForCategoryErr = "Err code: 3"
 const apiCategoryReadErr = "Err code: 4"
 const apiProductCacheReadErr = "Err code: 5"
+const apiPropertyValueReadErr = "Err code: 6"
 const newlyIntroducedProductIdsTotalCount = 8
 
 func ApiHandler(ctx *gin.Context) {
 	// Initialization or find dependencies
 	redisCachePool := ctx.MustGet(ginRouter.REDIS_POOL).(*redis.Pool)
 	db := ctx.MustGet(ginRouter.SQL_DB).(*sql.DB)
-	categoryDbDao := databaseDaos.CategorySqlDao{DB: db}
+	categorySqlDao := databaseDaos.CategorySqlDao{DB: db}
+	propertyValueSqlDao := databaseDaos.PropertyValueSqlDao{DB: db}
 	productCacheDao := cacheDaos.AllProductIdsRedisDao{Pool: redisCachePool}
 
 	// Read api request model
@@ -40,14 +42,20 @@ func ApiHandler(ctx *gin.Context) {
 	}
 
 	// Find category data
-	category, categoryReadErr := categoryDbDao.ReadCategoryComplete(apiRequest.CategoryId)
+	category, categoryReadErr := categorySqlDao.ReadCategoryComplete(apiRequest.CategoryId)
 	if categoryReadErr != nil {
 		ctx.JSON(http.StatusInternalServerError, apiCategoryReadErr)
 		return
 	}
 
+	allPropertyValues, propertyValueReadErr := propertyValueSqlDao.ReadAllPropertyValues()
+	if propertyValueReadErr != nil {
+		ctx.JSON(http.StatusInternalServerError, apiPropertyValueReadErr)
+		return
+	}
+
 	// Find filtered product ids
-	productIds, filteringErr := findFilteredProductIds(ctx, redisCachePool, apiRequest)
+	productIds, filteringErr := findFilteredProductIds(ctx, redisCachePool, apiRequest, allPropertyValues)
 	if filteringErr != nil {
 		ctx.JSON(http.StatusInternalServerError, apiFilteringErr)
 		return
@@ -89,9 +97,14 @@ func findFilteredProductIds(
 	ctx *gin.Context,
 	redisPool *redis.Pool,
 	apiRequest *models.ApiRequest,
+	allPropertyValues *[]dbModels.PropertyValue,
 ) (*[]int64, error) {
 	filterProductsDao := cacheDaos.FilterProductsDao{Pool: redisPool}
-	productIds, err := filterProductsDao.FindProductsForFilter(apiRequest.CategoryId, apiRequest.PropertyValueIdsMap)
+	productIds, err := filterProductsDao.FindProductsForFilter(
+		apiRequest.CategoryId,
+		apiRequest.PropertyValueIdsMap,
+		allPropertyValues,
+	)
 	if err != nil {
 		logData := apiCommons.NewApiErrorLogData(ctx, "something went wrong while filtering products", err)
 		apiCommons.LogApiError(logData)
