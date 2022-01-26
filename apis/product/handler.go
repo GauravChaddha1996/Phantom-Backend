@@ -39,10 +39,14 @@ func ApiHandler(ctx *gin.Context) {
 
 	// Make api response
 	apiResponse := models.ProductApiResponse{
-		Status:         "success",
-		Message:        "",
-		Snippets:       sections,
-		StepperSnippet: snippets.MakeStepperSnippet(apiDbResult.Product.Cost),
+		Status:   "success",
+		Message:  "",
+		Snippets: sections,
+		StepperSnippet: snippets.MakeStepperSnippet(
+			*apiDbResult.Product,
+			*apiDbResult.Brand,
+			*apiDbResult.Category,
+		),
 	}
 
 	ctx.JSON(http.StatusOK, apiResponse)

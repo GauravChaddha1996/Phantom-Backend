@@ -2,22 +2,27 @@ package snippets
 
 import (
 	"fmt"
+	"phantom/dataLayer/dbModels"
 	"phantom/dataLayer/uiModels/atoms"
 )
 
 type StepperSnippetData struct {
-	Type          string          `json:"type,omitempty"`
-	Title         *atoms.TextData `json:"title,omitempty"`
-	StepperConfig StepperConfig   `json:"stepper_config"`
+	Type  string                     `json:"type,omitempty"`
+	Title *atoms.TextData            `json:"title,omitempty"`
+	Click *atoms.AddProductClickData `json:"click,omitempty"`
 }
 
-type StepperConfig struct {
-}
-
-func MakeStepperSnippet(cost int64) StepperSnippetData {
+func MakeStepperSnippet(product dbModels.Product, brand dbModels.Brand, category dbModels.Category) StepperSnippetData {
 	return StepperSnippetData{
-		Type:          StepperSnippet,
-		Title:         &atoms.TextData{Text: fmt.Sprintf("Add for ₹%d", cost)},
-		StepperConfig: StepperConfig{},
+		Type:  StepperSnippet,
+		Title: &atoms.TextData{Text: fmt.Sprintf("Add for ₹%d", product.Cost)},
+		Click: &atoms.AddProductClickData{
+			Type:             atoms.ClickTypeAddProduct,
+			ProductId:        product.Id,
+			Name:             product.Name,
+			ShortDescription: product.ShortDescription,
+			BrandAndCategory: MakeBrandAndCategoryText(brand, category),
+			Image:            product.CardImage,
+		},
 	}
 }
